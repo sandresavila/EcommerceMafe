@@ -42,7 +42,15 @@ export default function ProductoPage() {
       <div className="grid md:grid-cols-2 gap-10 items-start">
 
         {/* IMAGEN */}
-        <div className="bg-white rounded-2xl shadow-md p-4">
+        <div className="bg-white rounded-2xl shadow-md p-4 relative">
+
+          {/* BADGE */}
+          {producto.stock > 0 && (
+            <span className="absolute top-4 left-4 bg-gold text-dark px-3 py-1 rounded-full text-xs font-semibold">
+              Disponible
+            </span>
+          )}
+
           <img
             src={producto.imagen_url}
             alt={producto.nombre}
@@ -66,32 +74,67 @@ export default function ProductoPage() {
             {formatPrice(producto.precio)}
           </p>
 
-          {/* STOCK */}
-          <p className="text-sm text-gray-500 mt-2">
-            {producto.stock > 0
-              ? `Stock disponible: ${producto.stock}`
-              : "Agotado"}
-          </p>
-
-          {/* BOTÓN */}
-          <button
-            onClick={() => addToCart(producto)}
-            disabled={producto.stock === 0}
-            className={`mt-6 w-full py-3 rounded-xl text-white font-semibold transition ${
-              producto.stock === 0
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-primary hover-scale"
+          {/* STOCK MEJORADO */}
+          <p
+            className={`text-sm mt-2 font-medium ${
+              producto.stock > 5
+                ? "text-green-600"
+                : producto.stock > 0
+                ? "text-yellow-600"
+                : "text-red-500"
             }`}
           >
-            {producto.stock === 0
-              ? "Producto agotado"
-              : "Agregar al carrito 🛒"}
-          </button>
+            {producto.stock > 5
+              ? "En stock"
+              : producto.stock > 0
+              ? `¡Quedan pocas unidades! (${producto.stock})`
+              : "Producto agotado"}
+          </p>
+
+          {/* BOTONES */}
+          <div className="flex flex-col sm:flex-row gap-4 mt-6">
+
+            <button
+              onClick={() => addToCart(producto)}
+              disabled={producto.stock === 0}
+              className={`flex-1 py-3 rounded-xl text-white font-semibold transition ${
+                producto.stock === 0
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-primary hover-scale"
+              }`}
+            >
+              {producto.stock === 0
+                ? "Producto agotado"
+                : "Agregar al carrito 🛒"}
+            </button>
+
+            <button className="flex-1 border border-primary text-primary py-3 rounded-xl hover:bg-primary hover:text-white transition">
+              ❤️ Guardar
+            </button>
+
+          </div>
+
+          {/* ASESORÍA (CLAVE EN TU PROYECTO) */}
+          <div className="mt-8 bg-gray-50 p-6 rounded-xl border">
+
+            <h3 className="font-semibold text-primary">
+              ¿No sabes si este producto es para ti?
+            </h3>
+
+            <p className="text-sm text-gray-600 mt-2">
+              Recibe asesoría personalizada y elige el producto ideal según tu tipo de piel o necesidad.
+            </p>
+
+            <button className="mt-4 bg-secondary text-white px-4 py-2 rounded-xl hover-scale text-sm">
+              💬 Hablar con un asesor
+            </button>
+
+          </div>
 
           {/* INFO EXTRA */}
           <div className="mt-8 border-t pt-6 space-y-2 text-sm text-gray-600">
             <p>✔ Envíos a todo el país</p>
-            <p>✔ Garantía de calidad</p>
+            <p>✔ Productos 100% originales</p>
             <p>✔ Pago seguro</p>
           </div>
 

@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-
+/* ================== VARIABLES ================== */
 :root {
   --color-primary: #E91E63;
   --color-secondary: #1E88E5;
@@ -15,14 +15,14 @@
   --font-body: "Poppins", sans-serif;
 }
 
-
+/* ================== BASE ================== */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-body);
 }
 
-
+/* ================== COLORES ================== */
 .bg-primary { background-color: var(--color-primary); }
 .bg-secondary { background-color: var(--color-secondary); }
 .bg-accent { background-color: var(--color-accent); }
@@ -31,18 +31,20 @@ body {
 .text-primary { color: var(--color-primary); }
 .text-dark { color: var(--color-dark); }
 
-
+/* ================== GRADIENTE ================== */
 .bg-brand-gradient {
   background: linear-gradient(135deg, #E91E63, #8E24AA, #1E88E5);
 }
 
-
+/* ================== HOVER ================== */
 .hover-scale {
   transition: all 0.3s ease;
 }
 .hover-scale:hover {
   transform: scale(1.05);
 }
+
+/* ================== UTILIDADES ================== */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -50,10 +52,73 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ================== ANIMACIONES ================== */
+
+/* Fade + subida */
+.fade-in {
+  animation: fadeIn 0.8s ease forwards;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide izquierda */
+.slide-left {
+  animation: slideLeft 0.8s ease forwards;
+}
+@keyframes slideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Slide derecha */
+.slide-right {
+  animation: slideRight 0.8s ease forwards;
+}
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Zoom */
+.zoom-in {
+  animation: zoomIn 0.6s ease forwards;
+}
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

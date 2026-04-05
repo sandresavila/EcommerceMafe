@@ -42,37 +42,44 @@ export default function Home() {
           alt="Belleza"
         />
 
-        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-black/60" />
 
         <div className="relative z-10 px-6">
           <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-            Resalta tu belleza natural ✨
+            Tu belleza, acompañada en cada compra 💖
           </h1>
 
           <p className="mt-4 text-lg max-w-xl mx-auto">
-            Productos premium para el cuidado personal
+            Recibe asesoría personalizada y encuentra los productos ideales para ti
           </p>
 
-          <Link href="/productos">
-            <button className="mt-6 bg-primary px-6 py-3 rounded-xl hover-scale shadow-lg">
-              Explorar productos
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+            <Link href="/productos">
+              <button className="bg-primary px-6 py-3 rounded-xl hover-scale shadow-lg">
+                Explorar productos
+              </button>
+            </Link>
+
+            <button className="border border-white px-6 py-3 rounded-xl hover-scale">
+              Recibir asesoría
             </button>
-          </Link>
+          </div>
         </div>
 
       </section>
 
       {/* QUIÉNES SOMOS */}
       <section className="grid md:grid-cols-2 gap-10 px-6 md:px-12 lg:px-20 py-16 items-center">
-        
+
         <div>
           <h2 className="text-3xl font-bold text-primary">
             Nuestra esencia
           </h2>
 
           <p className="mt-4 text-gray-600 leading-relaxed">
-            En MAFE creamos productos de belleza con altos estándares
-            de calidad, diseñados para resaltar lo mejor de ti.
+            En MAFE no solo vendemos productos de belleza, te acompañamos en cada paso.
+            Nuestro objetivo es ayudarte a elegir lo mejor para ti, con asesoría
+            personalizada y productos de alta calidad.
           </p>
         </div>
 
@@ -81,6 +88,34 @@ export default function Home() {
           className="rounded-2xl shadow-lg"
           alt="Belleza"
         />
+
+      </section>
+
+      {/* CATEGORÍAS */}
+      <section className="px-6 md:px-16 lg:px-24 py-16">
+
+        <h2 className="text-3xl font-bold text-center mb-10 text-dark">
+          Categorías
+        </h2>
+
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+
+          {[
+            "Maquillaje",
+            "Skincare",
+            "Capilar",
+            "Fragancias",
+            "Corporal",
+          ].map((cat) => (
+            <div
+              key={cat}
+              className="bg-white rounded-xl shadow-md p-6 text-center hover-scale cursor-pointer"
+            >
+              <p className="font-semibold">{cat}</p>
+            </div>
+          ))}
+
+        </div>
 
       </section>
 
@@ -134,15 +169,32 @@ export default function Home() {
 
       </section>
 
-      {/* CTA */}
+      {/* ASESORÍA */}
+      <section className="px-6 md:px-16 lg:px-24 py-16 text-center">
+
+        <h2 className="text-3xl font-bold text-primary">
+          ¿No sabes qué producto elegir?
+        </h2>
+
+        <p className="mt-4 text-gray-600">
+          Nuestro equipo te ayuda a encontrar lo ideal para ti
+        </p>
+
+        <button className="mt-6 bg-secondary text-white px-6 py-3 rounded-xl hover-scale shadow-md">
+          Hablar con un asesor
+        </button>
+
+      </section>
+
+      {/* CTA FINAL */}
       <section className="bg-brand-gradient text-center py-16 text-white">
 
         <h2 className="text-3xl font-bold">
-          Descubre tu mejor versión
+          Encuentra los productos ideales para ti ✨
         </h2>
 
         <p className="mt-2 text-lg">
-          Productos pensados para tu bienestar
+          Con asesoría personalizada en cada compra
         </p>
 
         <Link href="/productos">

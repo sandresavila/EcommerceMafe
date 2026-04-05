@@ -1,26 +1,32 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 
-// 👇 COMPONENTES
+// COMPONENTES
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { CartProvider } from "@/context/CartContext";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// 🔥 FUENTE PRINCIPAL (ALINEADA CON TU DISEÑO)
+const poppins = Poppins({
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-body",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-// 🔥 METADATA
+// 🔥 METADATA (MEJORADA PARA SEO Y PROYECTO)
 export const metadata: Metadata = {
-  title: "MAFE Beauty",
-  description: "Tienda online de productos de belleza y cuidado personal",
+  title: "MAFE Beauty | Tienda de Belleza",
+  description:
+    "Compra productos de belleza con asesoría personalizada. Maquillaje, skincare, cuidado personal y más en MAFE.",
+  keywords: [
+    "belleza",
+    "cosméticos",
+    "skincare",
+    "maquillaje",
+    "tienda online",
+    "Colombia",
+  ],
 };
 
 export default function RootLayout({
@@ -31,11 +37,11 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${poppins.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-white text-dark">
+      <body className="min-h-full flex flex-col bg-white text-dark font-body">
 
-        {/* 🔥 PROVIDER GLOBAL */}
+        {/* PROVIDER GLOBAL */}
         <CartProvider>
 
           {/* NAVBAR */}

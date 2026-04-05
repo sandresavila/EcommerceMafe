@@ -3,9 +3,11 @@
 import { Producto } from "@/types/producto";
 import { useCart } from "@/context/CartContext";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function ProductCard({ producto }: { producto: Producto }) {
   const { addToCart } = useCart();
+  const [liked, setLiked] = useState(false);
 
   if (!producto || !producto.id_producto) return null;
 
@@ -20,6 +22,7 @@ export default function ProductCard({ producto }: { producto: Producto }) {
 
       {/* IMAGEN */}
       <div className="relative overflow-hidden">
+
         <Link href={`/producto/${producto.id_producto}`}>
           <img
             src={producto.imagen_url}
@@ -28,10 +31,31 @@ export default function ProductCard({ producto }: { producto: Producto }) {
           />
         </Link>
 
-        {/* BADGE */}
-        <span className="absolute top-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded">
-          Nuevo
+        {/* BADGE DINÁMICO */}
+        <span
+          className={`absolute top-2 left-2 text-white text-xs px-2 py-1 rounded ${
+            producto.stock > 5
+              ? "bg-primary"
+              : producto.stock > 0
+              ? "bg-yellow-500"
+              : "bg-gray-400"
+          }`}
+        >
+          {producto.stock > 5
+            ? "Disponible"
+            : producto.stock > 0
+            ? "Pocas unidades"
+            : "Agotado"}
         </span>
+
+        {/* FAVORITO */}
+        <button
+          onClick={() => setLiked(!liked)}
+          className="absolute top-2 right-2 bg-white/80 backdrop-blur p-2 rounded-full hover:scale-110 transition"
+        >
+          {liked ? "❤️" : "🤍"}
+        </button>
+
       </div>
 
       {/* CONTENIDO */}
@@ -45,22 +69,32 @@ export default function ProductCard({ producto }: { producto: Producto }) {
           {producto.descripcion}
         </p>
 
-        {/* PRECIO */}
+        {/* PRECIO + ACCIÓN */}
         <div className="flex justify-between items-center mt-4">
 
           <span className="text-primary font-bold text-lg">
             {formatPrice(producto.precio)}
           </span>
 
-          {/* BOTÓN */}
           <button
             onClick={() => addToCart(producto)}
-            className="bg-primary text-white px-3 py-1.5 rounded-lg text-sm hover:scale-105 transition"
+            disabled={producto.stock === 0}
+            className={`px-3 py-1.5 rounded-lg text-sm transition ${
+              producto.stock === 0
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-primary text-white hover:scale-105"
+            }`}
           >
             🛒
           </button>
 
         </div>
+
+        {/* MENSAJE DE CONFIANZA */}
+        <p className="text-xs text-gray-400 mt-3">
+          ✔ Producto original
+        </p>
+
       </div>
 
     </div>
