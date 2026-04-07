@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+
+:root {
+  --color-primary: #E91E63;
+  --color-secondary: #1E88E5;
+  --color-accent: #8E24AA;
+  --color-gold: #FBC02D;
+  --color-dark: #1A1A1A;
+  --color-light: #FFFFFF;
+
+  --background: #ffffff;
+  --foreground: #1A1A1A;
+
+  --font-body: "Poppins", sans-serif;
+}
+
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+
+.bg-primary { background-color: var(--color-primary); }
+.bg-secondary { background-color: var(--color-secondary); }
+.bg-accent { background-color: var(--color-accent); }
+.bg-gold { background-color: var(--color-gold); }
+
+.text-primary { color: var(--color-primary); }
+.text-dark { color: var(--color-dark); }
+
+
+.bg-brand-gradient {
+  background: linear-gradient(135deg, #E91E63, #8E24AA, #1E88E5);
+}
+
+
+.hover-scale {
+  transition: all 0.3s ease;
+}
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
