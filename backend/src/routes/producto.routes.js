@@ -10,11 +10,9 @@ import {
 const router = Router();
 
 // Ruta para crear un producto (Solo la usará el Admin)
-// Cambiado productosController.crearProducto por createProducto que ya está importado
 router.post('/admin/nuevo', createProducto);
 
 // Ruta para eliminar un producto
-// Cambiado productosController.eliminarProducto por deleteProducto que ya está importado
 router.delete('/admin/eliminar/:id', deleteProducto);
 
 // Obtener todos los productos

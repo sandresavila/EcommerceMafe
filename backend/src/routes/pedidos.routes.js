@@ -1,9 +1,15 @@
 import { Router } from "express";
-import { getPedidos, actualizarEstadoPedido } from "../controllers/pedidos.controller.js";
+import { 
+    getPedidos, 
+    actualizarEstadoPedido, 
+    getDashboardStats  
+} from "../controllers/pedidos.controller.js";
 
 const router = Router();
 
-router.get("/api/pedidos", getPedidos);
-router.put("/api/pedidos/:id", actualizarEstadoPedido);
+router.get("/stats", getDashboardStats);
+router.get("/", getPedidos);
+router.patch("/:id", actualizarEstadoPedido);
+router.patch("/", actualizarEstadoPedido);
 
 export default router;

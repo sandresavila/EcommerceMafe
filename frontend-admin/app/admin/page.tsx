@@ -32,12 +32,11 @@ export default function AdminPage() {
     }
   }, [isLoggedIn]); 
 
-  // --- FUNCIONES DE API CORREGIDAS ---
+  // --- FUNCIONES DE API ---
 
   const manejarLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // CORRECCIÓN: La ruta en app.js es /api + /login de authRoutes
       const res = await fetch("http://localhost:4000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -56,11 +55,9 @@ export default function AdminPage() {
 
   const cargarProductos = async () => {
     try {
-      // CORRECCIÓN: Según tu app.js es /api/productos
       const res = await fetch("http://localhost:4000/api/productos");
       const data = await res.json();
-      // Si el backend envía un objeto con una propiedad, asegúrate de acceder a ella. 
-      // Si envía el array directo, esto funciona:
+       
       setProductos(Array.isArray(data) ? data : (data.productos || []));
     } catch (error) { 
         console.error("Error productos:", error); 
@@ -69,7 +66,6 @@ export default function AdminPage() {
 
   const cargarCategorias = async () => {
     try {
-      // CORRECCIÓN: Según tu app.js es /api + /categorias
       const res = await fetch("http://localhost:4000/api/categorias");
       const data = await res.json();
       const listaCategorias = Array.isArray(data) ? data : (data.categorias || []);
@@ -110,7 +106,7 @@ export default function AdminPage() {
 
   const eliminarProducto = async (id: number) => {
     if (!confirm("¿Eliminar producto?")) return;
-    // CORRECCIÓN: La ruta incluye el ID
+    
     await fetch(`http://localhost:4000/api/productos/${id}`, { method: 'DELETE' });
     cargarProductos();
   };
