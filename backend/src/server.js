@@ -1,10 +1,88 @@
-import app from "./app.js";
+import express from "express";
+
 import dotenv from "dotenv";
+
+import path from "path";
+
+// APP
+import app from "./app.js";
+
+// ROUTES
+import usuarioRoutes
+  from "./routes/usuario.routes.js";
+
+import productoRoutes
+  from "./routes/producto.routes.js";
+
+import authRoutes
+  from "./routes/auth.routes.js";
+
+import carritoRoutes
+  from "./routes/carrito.routes.js";
+
+import pedidoRoutes
+  from "./routes/pedido.routes.js";
+
+import categoriaRoutes
+  from "./routes/categoria.routes.js";
 
 dotenv.config();
 
-const PORT = process.env.PORT || 4000;
+const PORT =
+  process.env.PORT || 4000;
+
+// =====================================
+// IMAGENES
+// =====================================
+
+app.use(
+  "/uploads",
+  express.static(
+    path.resolve("uploads")
+  )
+);
+
+// =====================================
+// ROUTES
+// =====================================
+
+app.use(
+  "/api/auth",
+  authRoutes
+);
+
+app.use(
+  "/api/usuarios",
+  usuarioRoutes
+);
+
+app.use(
+  "/api/productos",
+  productoRoutes
+);
+
+app.use(
+  "/api/carrito",
+  carritoRoutes
+);
+
+app.use(
+  "/api/pedidos",
+  pedidoRoutes
+);
+
+app.use(
+  "/api/categorias",
+  categoriaRoutes
+);
+
+// =====================================
+// SERVER
+// =====================================
 
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+
+  console.log(
+    `Servidor corriendo en http://localhost:${PORT}`
+  );
 });

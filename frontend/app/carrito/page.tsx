@@ -2,6 +2,7 @@
 
 import { useCart } from "@/context/CartContext";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function CarritoPage() {
   const { cart, removeFromCart } = useCart();
@@ -42,8 +43,11 @@ export default function CarritoPage() {
               >
 
                 {/* IMAGEN */}
-                <img
+                <Image
                   src={item.imagen_url}
+                  alt={item.nombre}
+                  width={96}
+                  height={96}
                   className="w-24 h-24 object-cover rounded-lg"
                 />
 
@@ -95,9 +99,15 @@ export default function CarritoPage() {
 
           {/* BOTÓN */}
           <div className="mt-6 text-right">
-            <button className="bg-primary text-white px-6 py-3 rounded-xl hover-scale">
-              Finalizar compra
-            </button>
+
+            <Link href="/checkout">
+
+              <button className="bg-primary text-white px-6 py-3 rounded-xl hover-scale">
+                Finalizar compra
+              </button>
+
+            </Link>
+
           </div>
         </>
       )}

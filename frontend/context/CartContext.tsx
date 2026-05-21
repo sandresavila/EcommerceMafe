@@ -1,95 +1,336 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+
+import axios from "axios";
+
 import { Producto } from "@/types/producto";
 
-// 🧩 ITEM DEL CARRITO
+import { useAuth } from "@/context/AuthContext";
+
+// 🧩 ITEM CARRITO
 interface CartItem extends Producto {
   cantidad: number;
 }
 
-// 🧠 TIPADO DEL CONTEXTO
+// 🧠 CONTEXTO
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (producto: Producto) => void;
-  removeFromCart: (id: number) => void;
-  increaseQuantity: (id: number) => void;
-  decreaseQuantity: (id: number) => void;
-  clearCart: () => void;
+
+  addToCart: (
+    producto: Producto
+  ) => Promise<void>;
+
+  removeFromCart: (
+    id: number
+  ) => Promise<void>;
+
+  increaseQuantity: (
+    id: number
+  ) => Promise<void>;
+
+  decreaseQuantity: (
+    id: number
+  ) => Promise<void>;
+
+  clearCart: () => Promise<void>;
 }
 
-const CartContext = createContext<CartContextType | undefined>(undefined);
+const CartContext = createContext<
+  CartContextType | undefined
+>(undefined);
 
 // 🚀 PROVIDER
-export function CartProvider({ children }: { children: React.ReactNode }) {
+export function CartProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
 
-  // 🔥 INICIALIZACIÓN DESDE LOCALSTORAGE (FORMA PRO)
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    if (typeof window === "undefined") return [];
+  const { token, usuario } =
+    useAuth();
 
-    const storedCart = localStorage.getItem("cart");
-    return storedCart ? JSON.parse(storedCart) : [];
-  });
+  const [cart, setCart] =
+    useState<CartItem[]>([]);
 
-  // 💾 GUARDAR EN LOCALSTORAGE
+  const API_URL =
+    `${process.env.NEXT_PUBLIC_API_URL}/carrito`;
+
+  // =====================================
+  // CARGAR CARRITO
+  // =====================================
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
 
-  // ➕ AGREGAR PRODUCTO
-  const addToCart = (producto: Producto) => {
-    setCart((prev) => {
-      const existe = prev.find(
-        (item) => item.id_producto === producto.id_producto
+    const cargarCarrito =
+      async () => {
+
+        // USUARIO LOGUEADO
+        if (token) {
+          try {
+
+            const response =
+              await axios.get(
+                API_URL,
+                {
+                  headers: {
+                    Authorization:
+                      `Bearer ${token}`,
+                  },
+                }
+              );
+
+            setCart(response.data);
+
+          } catch (error) {
+            console.error(error);
+          }
+
+        } else {
+
+          // LOCALSTORAGE
+          const storedCart =
+            localStorage.getItem(
+              "cart"
+            );
+
+          setCart(
+            storedCart
+              ? JSON.parse(storedCart)
+              : []
+          );
+        }
+      };
+
+    cargarCarrito();
+
+  }, [token]);
+
+  // =====================================
+  // GUARDAR LOCAL
+  // =====================================
+  useEffect(() => {
+
+    if (!usuario) {
+      localStorage.setItem(
+        "cart",
+        JSON.stringify(cart)
       );
+    }
 
-      if (existe) {
-        return prev.map((item) =>
-          item.id_producto === producto.id_producto
-            ? { ...item, cantidad: item.cantidad + 1 }
-            : item
+  }, [cart, usuario]);
+
+  // =====================================
+  // AGREGAR PRODUCTO
+  // =====================================
+  const addToCart = async (
+    producto: Producto
+  ) => {
+
+    // USUARIO LOGUEADO
+    if (token) {
+
+      try {
+
+        await axios.post(
+          API_URL,
+          {
+            id_producto:
+              producto.id_producto,
+
+            cantidad: 1,
+          },
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
         );
+
+        setCart((prev) => {
+
+          const existe =
+            prev.find(
+              (item) =>
+                item.id_producto ===
+                producto.id_producto
+            );
+
+          if (existe) {
+
+            return prev.map(
+              (item) =>
+                item.id_producto ===
+                producto.id_producto
+                  ? {
+                      ...item,
+                      cantidad:
+                        item.cantidad + 1,
+                    }
+                  : item
+            );
+          }
+
+          return [
+            ...prev,
+            {
+              ...producto,
+              cantidad: 1,
+            },
+          ];
+        });
+
+      } catch (error) {
+        console.error(error);
       }
 
-      return [...prev, { ...producto, cantidad: 1 }];
-    });
+    } else {
+
+      // LOCAL
+      setCart((prev) => {
+
+        const existe =
+          prev.find(
+            (item) =>
+              item.id_producto ===
+              producto.id_producto
+          );
+
+        if (existe) {
+
+          return prev.map(
+            (item) =>
+              item.id_producto ===
+              producto.id_producto
+                ? {
+                    ...item,
+                    cantidad:
+                      item.cantidad + 1,
+                  }
+                : item
+          );
+        }
+
+        return [
+          ...prev,
+          {
+            ...producto,
+            cantidad: 1,
+          },
+        ];
+      });
+    }
   };
 
-  // ❌ ELIMINAR PRODUCTO
-  const removeFromCart = (id: number) => {
-    setCart((prev) =>
-      prev.filter((item) => item.id_producto !== id)
-    );
-  };
+  // =====================================
+  // ELIMINAR PRODUCTO
+  // =====================================
+  const removeFromCart = async (
+    id: number
+  ) => {
 
-  // 🔼 AUMENTAR CANTIDAD
-  const increaseQuantity = (id: number) => {
+    // BACKEND
+    if (token) {
+
+      try {
+
+        await axios.delete(
+          `${API_URL}/${id}`,
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        );
+
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    // FRONT
     setCart((prev) =>
-      prev.map((item) =>
-        item.id_producto === id
-          ? { ...item, cantidad: item.cantidad + 1 }
-          : item
+      prev.filter(
+        (item) =>
+          item.id_producto !== id
       )
     );
   };
 
-  // 🔽 DISMINUIR CANTIDAD
-  const decreaseQuantity = (id: number) => {
-    setCart((prev) =>
-      prev
-        .map((item) =>
-          item.id_producto === id
-            ? { ...item, cantidad: item.cantidad - 1 }
-            : item
-        )
-        .filter((item) => item.cantidad > 0) // elimina si llega a 0
-    );
-  };
+  // =====================================
+  // AUMENTAR
+  // =====================================
+  const increaseQuantity =
+    async (id: number) => {
 
-  // 🧹 VACIAR CARRITO
-  const clearCart = () => {
-    setCart([]);
-  };
+      const producto =
+        cart.find(
+          (item) =>
+            item.id_producto === id
+        );
+
+      if (!producto) return;
+
+      await addToCart(producto);
+    };
+
+  // =====================================
+  // DISMINUIR
+  // =====================================
+  const decreaseQuantity =
+    async (id: number) => {
+
+      setCart((prev) =>
+        prev
+          .map((item) =>
+            item.id_producto === id
+              ? {
+                  ...item,
+                  cantidad:
+                    item.cantidad - 1,
+                }
+              : item
+          )
+          .filter(
+            (item) =>
+              item.cantidad > 0
+          )
+      );
+    };
+
+  // =====================================
+  // VACIAR
+  // =====================================
+  const clearCart =
+    async () => {
+
+      if (token) {
+
+        try {
+
+          await axios.delete(
+            API_URL,
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          );
+
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      setCart([]);
+    };
 
   return (
     <CartContext.Provider
@@ -107,12 +348,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// 🪝 HOOK PERSONALIZADO
+// 🪝 HOOK
 export function useCart() {
-  const context = useContext(CartContext);
+
+  const context =
+    useContext(CartContext);
 
   if (!context) {
-    throw new Error("useCart debe usarse dentro de CartProvider");
+
+    throw new Error(
+      "useCart debe usarse dentro de CartProvider"
+    );
   }
 
   return context;

@@ -1,174 +1,434 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { useCart } from "@/context/CartContext";
-import { ShoppingCart, Search, User } from "lucide-react";
+
+import {
+  useState,
+  useEffect,
+} from "react";
+
+import {
+  ShoppingCart,
+  User,
+  X,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+} from "lucide-react";
+
+import {
+  useCart,
+} from "@/context/CartContext";
+
+import {
+  useAuth,
+} from "@/context/AuthContext";
 
 export default function Navbar() {
-  const { cart } = useCart();
-  const [showLogin, setShowLogin] = useState(false);
 
-  // Simulación de usuario (luego lo conectas con auth real)
-  const user = null; // cambia esto cuando tengas login real
+  const { cart } =
+    useCart();
 
-  const totalItems = cart.reduce(
-    (acc, item) => acc + item.cantidad,
-    0
-  );
+  const {
+    usuario,
+    login,
+    logout,
+  } = useAuth();
+
+  const [showLogin,
+    setShowLogin] =
+      useState(false);
+
+  const [mobileMenu,
+    setMobileMenu] =
+      useState(false);
+
+  const [correo,
+    setCorreo] =
+      useState("");
+
+  const [password,
+    setPassword] =
+      useState("");
+
+  const [loading,
+    setLoading] =
+      useState(false);
+
+  const [error,
+    setError] =
+      useState("");
+
+  const [mounted,
+    setMounted] =
+      useState(false);
+
+  useEffect(() => {
+
+    setMounted(true);
+
+  }, []);
+
+  // =====================================
+  // TOTAL CARRITO
+  // =====================================
+
+  const totalItems =
+    cart.reduce(
+      (acc, item) =>
+        acc +
+        item.cantidad,
+      0
+    );
+
+  // =====================================
+  // LOGIN
+  // =====================================
+
+  const handleLogin =
+    async () => {
+
+      try {
+
+        setLoading(true);
+
+        setError("");
+
+        await login(
+          correo,
+          password
+        );
+
+        setShowLogin(false);
+
+        setCorreo("");
+
+        setPassword("");
+
+      } catch (error) {
+
+        console.error(error);
+
+        setError(
+          "Correo o contraseña incorrectos"
+        );
+
+      } finally {
+
+        setLoading(false);
+      }
+    };
+
+  if (!mounted)
+    return null;
 
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b">
+      {/* NAVBAR */}
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 border-b border-white/20 shadow-sm">
 
-        <div className="max-w-7xl mx-auto px-6 md:px-10 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
 
           {/* LOGO */}
-          <Link href="/">
-            <h1 className="text-2xl font-bold text-primary tracking-wide">
-              MAFE Beauty
-            </h1>
+          <Link
+            href="/"
+            className="text-3xl font-black tracking-tight"
+          >
+
+            <span className="text-primary">
+              MAFE
+            </span>
+
+            <span className="text-dark">
+              Beauty
+            </span>
+
           </Link>
 
-          {/* MENU */}
-          <ul className="hidden md:flex gap-8 text-dark font-medium">
-            <li>
-              <Link href="/" className="hover:text-primary transition">
-                Inicio
-              </Link>
-            </li>
+          {/* NAV DESKTOP */}
+          <nav className="hidden lg:flex items-center gap-8 font-medium text-gray-700">
 
-            <li>
-              <Link href="/productos" className="hover:text-primary transition">
-                Productos
-              </Link>
-            </li>
+            <Link
+              href="/"
+              className="hover:text-primary transition"
+            >
+              Inicio
+            </Link>
 
-            <li>
-              <Link href="/categorias" className="hover:text-primary transition">
-                Categorías
-              </Link>
-            </li>
+            <Link
+              href="/productos"
+              className="hover:text-primary transition"
+            >
+              Productos
+            </Link>
 
-            <li>
-              <Link href="/asesoria" className="hover:text-primary transition">
-                Asesoría
-              </Link>
-            </li>
+            <Link
+              href="/nosotros"
+              className="hover:text-primary transition"
+            >
+              Nosotros
+            </Link>
 
-            <li>
-              <Link href="/contacto" className="hover:text-primary transition">
-                Contacto
-              </Link>
-            </li>
-          </ul>
+            <Link
+              href="/contacto"
+              className="hover:text-primary transition"
+            >
+              Contacto
+            </Link>
 
-          {/* ACCIONES */}
+          </nav>
+
+          {/* ACTIONS */}
           <div className="flex items-center gap-4">
 
-            {/* BUSCAR */}
-            <button className="hover:scale-110 transition text-dark">
-              <Search size={20} />
-            </button>
+            {/* ADMIN BTN */}
+            {usuario?.rol ===
+              "admin" && (
+
+              <Link
+                href="/admin"
+                className="hidden md:flex items-center gap-2 bg-primary/10 text-primary px-5 py-2.5 rounded-2xl font-semibold hover:bg-primary hover:text-white transition"
+              >
+
+                <LayoutDashboard className="w-4 h-4" />
+
+                Panel Admin
+
+              </Link>
+            )}
 
             {/* CARRITO */}
-            <Link href="/carrito" className="relative">
+            <Link
+              href="/carrito"
+              className="relative hover:scale-110 transition"
+            >
 
-              <div className="bg-primary text-white p-2 rounded-xl shadow hover:scale-105 transition">
-                <ShoppingCart size={20} />
-              </div>
+              <ShoppingCart className="w-6 h-6 text-gray-700" />
 
-              {/* CONTADOR */}
-              <span
-                suppressHydrationWarning
-                className={`absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 rounded-full transition ${
-                  totalItems > 0 ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                {totalItems}
-              </span>
+              {totalItems > 0 && (
+
+                <span className="absolute -top-2 -right-2 bg-primary text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-semibold">
+
+                  {totalItems}
+
+                </span>
+              )}
 
             </Link>
 
-            {/* LOGIN / USUARIO */}
-            {user ? (
-              <div className="flex items-center gap-2 cursor-pointer">
-                <div className="bg-secondary text-white w-9 h-9 rounded-full flex items-center justify-center">
-                  U
+            {/* USUARIO */}
+            {usuario ? (
+
+              <div className="flex items-center gap-4">
+
+                {/* AVATAR */}
+                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-pink-400 text-white flex items-center justify-center font-bold shadow-lg">
+
+                  {usuario.nombre.charAt(0)}
+
                 </div>
+
+                {/* INFO */}
+                <div className="hidden md:flex flex-col">
+
+                  <span className="font-semibold text-sm">
+                    {usuario.nombre}
+                  </span>
+
+                  <span className="text-xs text-gray-500 capitalize">
+                    {usuario.rol}
+                  </span>
+
+                </div>
+
+                {/* LOGOUT */}
+                <button
+                  onClick={logout}
+                  className="hidden md:flex items-center gap-2 border px-4 py-2 rounded-2xl hover:bg-gray-100 transition text-sm"
+                >
+
+                  <LogOut className="w-4 h-4" />
+
+                  Salir
+
+                </button>
+
               </div>
+
             ) : (
+
               <button
-                onClick={() => setShowLogin(true)}
-                className="flex items-center gap-2 border px-4 py-2 rounded-xl hover:bg-gray-100 transition"
+                onClick={() =>
+                  setShowLogin(true)
+                }
+                className="hidden md:flex items-center gap-2 bg-primary hover:scale-105 transition text-white px-5 py-3 rounded-2xl shadow-lg"
               >
-                <User size={18} />
-                <span className="hidden md:block">Iniciar sesión</span>
+
+                <User className="w-5 h-5" />
+
+                Iniciar sesión
+
               </button>
             )}
+
+            {/* MOBILE BTN */}
+            <button
+              onClick={() =>
+                setMobileMenu(
+                  !mobileMenu
+                )
+              }
+              className="lg:hidden"
+            >
+
+              <Menu className="w-7 h-7" />
+
+            </button>
 
           </div>
 
         </div>
-      </nav>
+
+        {/* MOBILE MENU */}
+        {mobileMenu && (
+
+          <div className="lg:hidden bg-white border-t px-6 py-6 space-y-5 shadow-xl">
+
+            <Link
+              href="/"
+              className="block"
+            >
+              Inicio
+            </Link>
+
+            <Link
+              href="/productos"
+              className="block"
+            >
+              Productos
+            </Link>
+
+            <Link
+              href="/nosotros"
+              className="block"
+            >
+              Nosotros
+            </Link>
+
+            <Link
+              href="/contacto"
+              className="block"
+            >
+              Contacto
+            </Link>
+
+            {/* ADMIN */}
+            {usuario?.rol ===
+              "admin" && (
+
+              <>
+                <hr />
+
+                <Link
+                  href="/admin/dashboard"
+                  className="block text-primary font-semibold"
+                >
+                  Panel Admin
+                </Link>
+              </>
+            )}
+
+          </div>
+        )}
+
+      </header>
 
       {/* MODAL LOGIN */}
       {showLogin && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
 
-          <div className="bg-white rounded-2xl p-8 w-[90%] max-w-md shadow-xl relative">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">
 
-            {/* CERRAR */}
+          <div className="bg-white w-full max-w-md rounded-[2rem] p-10 relative shadow-2xl animate-fade-in">
+
+            {/* CLOSE */}
             <button
-              onClick={() => setShowLogin(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-black"
+              onClick={() =>
+                setShowLogin(false)
+              }
+              className="absolute top-5 right-5 hover:scale-110 transition"
             >
-              ✕
+
+              <X className="w-5 h-5" />
+
             </button>
 
-            <h2 className="text-2xl font-bold text-center text-primary">
-              Bienvenido a MAFE 💖
-            </h2>
+            {/* HEADER */}
+            <div className="text-center mb-8">
 
-            <p className="text-center text-gray-500 mt-2">
-              Accede para una mejor experiencia
-            </p>
+              <h2 className="text-4xl font-black">
+                Bienvenido ✨
+              </h2>
 
-            {/* GOOGLE */}
-            <button className="w-full mt-6 border py-3 rounded-xl flex items-center justify-center gap-3 hover:bg-gray-100 transition">
-              <img
-                src="https://www.svgrepo.com/show/475656/google-color.svg"
-                alt="google"
-                className="w-5 h-5"
-              />
-              Continuar con Google
-            </button>
+              <p className="text-gray-500 mt-3">
+                Inicia sesión para continuar
+              </p>
 
-            {/* DIVIDER */}
-            <div className="flex items-center gap-3 my-6">
-              <div className="flex-1 h-px bg-gray-300" />
-              <span className="text-gray-400 text-sm">o</span>
-              <div className="flex-1 h-px bg-gray-300" />
             </div>
 
-            {/* FORM */}
-            <input
-              type="email"
-              placeholder="Correo electrónico"
-              className="w-full border p-3 rounded-xl mb-3"
-            />
+            {/* INPUTS */}
+            <div className="space-y-4">
 
-            <input
-              type="password"
-              placeholder="Contraseña"
-              className="w-full border p-3 rounded-xl"
-            />
+              <input
+                type="email"
+                placeholder="Correo electrónico"
+                value={correo}
+                onChange={(e) =>
+                  setCorreo(
+                    e.target.value
+                  )
+                }
+                className="w-full border-2 border-gray-200 focus:border-primary outline-none p-4 rounded-2xl"
+              />
 
-            <button className="w-full mt-4 bg-primary text-white py-3 rounded-xl hover-scale">
-              Iniciar sesión
+              <input
+                type="password"
+                placeholder="Contraseña"
+                value={password}
+                onChange={(e) =>
+                  setPassword(
+                    e.target.value
+                  )
+                }
+                className="w-full border-2 border-gray-200 focus:border-primary outline-none p-4 rounded-2xl"
+              />
+
+            </div>
+
+            {/* ERROR */}
+            {error && (
+
+              <p className="text-red-500 text-sm mt-3">
+
+                {error}
+
+              </p>
+            )}
+
+            {/* BTN */}
+            <button
+              onClick={handleLogin}
+              disabled={loading}
+              className="w-full mt-6 bg-primary hover:opacity-90 transition text-white py-4 rounded-2xl font-bold text-lg"
+            >
+
+              {loading
+                ? "Ingresando..."
+                : "Iniciar sesión"}
+
             </button>
 
           </div>
+
         </div>
       )}
     </>

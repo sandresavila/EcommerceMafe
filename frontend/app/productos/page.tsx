@@ -1,134 +1,375 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import ProductCard from "@/components/ProductCard";
-import { Producto } from "@/types/producto";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import ProductCard
+  from "@/components/ProductCard";
+
+import {
+  Producto,
+} from "@/types/producto";
+
+interface Categoria {
+
+  id_categoria: number;
+
+  nombre: string;
+}
 
 export default function ProductosPage() {
-  const [productos, setProductos] = useState<Producto[]>([]);
-  const [busqueda, setBusqueda] = useState("");
-  const [categoria, setCategoria] = useState("");
-  const [loading, setLoading] = useState(true);
+
+  const [productos,
+    setProductos] =
+      useState<Producto[]>([]);
+
+  const [categorias,
+    setCategorias] =
+      useState<Categoria[]>([]);
+
+  const [busqueda,
+    setBusqueda] =
+      useState("");
+
+  const [categoriaSeleccionada,
+    setCategoriaSeleccionada] =
+      useState<number | null>(null);
+
+  const [loading,
+    setLoading] =
+      useState(true);
+
+  // =====================================
+  // CARGAR PRODUCTOS
+  // =====================================
 
   useEffect(() => {
-    fetch("http://localhost:4000/api/productos")
-      .then((res) => res.json())
-      .then((data) => {
-        setProductos(data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+
+    const fetchProductos =
+      async () => {
+
+        try {
+
+          const response =
+            await fetch(
+              "http://localhost:4000/api/productos"
+            );
+
+          const data =
+            await response.json();
+
+          setProductos(data);
+
+        } catch (error) {
+
+          console.error(error);
+
+        } finally {
+
+          setLoading(false);
+        }
+      };
+
+    fetchProductos();
+
   }, []);
 
-  // 🔍 FILTROS
-  const filtrados = productos.filter((p) => {
-    const matchBusqueda = p.nombre
-      .toLowerCase()
-      .includes(busqueda.toLowerCase());
+  // =====================================
+  // CARGAR CATEGORIAS
+  // =====================================
 
-    const matchCategoria = categoria
-      ? p.id_categoria === Number(categoria)
-      : true;
+  useEffect(() => {
 
-    return matchBusqueda && matchCategoria;
-  });
+    const fetchCategorias =
+      async () => {
+
+        try {
+
+          const response =
+            await fetch(
+              "http://localhost:4000/api/categorias"
+            );
+
+          const data =
+            await response.json();
+
+          setCategorias(data);
+
+        } catch (error) {
+
+          console.error(error);
+        }
+      };
+
+    fetchCategorias();
+
+  }, []);
+
+  // =====================================
+  // FILTROS
+  // =====================================
+
+  const productosFiltrados =
+    useMemo(() => {
+
+      return productos.filter(
+        (producto) => {
+
+          // BUSQUEDA
+          const matchBusqueda =
+            producto.nombre
+              .toLowerCase()
+              .includes(
+                busqueda.toLowerCase()
+              );
+
+          // CATEGORIA
+          const matchCategoria =
+            categoriaSeleccionada
+              ? producto.id_categoria ===
+                categoriaSeleccionada
+              : true;
+
+          return (
+            matchBusqueda &&
+            matchCategoria
+          );
+        }
+      );
+
+    }, [
+      productos,
+      busqueda,
+      categoriaSeleccionada,
+    ]);
 
   return (
-    <main className="px-6 md:px-10 py-12 max-w-7xl mx-auto">
+    <main className="min-h-screen bg-gray-100 px-6 md:px-10 py-12">
 
-      {/* HEADER */}
-      <div className="mb-10 text-center">
-        <h1 className="text-4xl font-bold text-primary">
-          Encuentra tu producto ideal 💄
-        </h1>
+      <div className="max-w-7xl mx-auto">
 
-        <p className="text-gray-600 mt-2">
-          Belleza, cuidado personal y asesoría en un solo lugar
-        </p>
-      </div>
+        {/* HEADER */}
+        <div className="mb-12 text-center">
 
-      {/* FILTROS */}
-      <div className="bg-white shadow-md rounded-2xl p-4 mb-10 flex flex-col md:flex-row gap-4 items-center justify-between">
+          <h1 className="text-5xl font-bold text-primary mb-4">
 
-        {/* BUSCADOR */}
-        <input
-          type="text"
-          placeholder="Buscar maquillaje, skincare, etc..."
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          className="border px-4 py-2 rounded-xl w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-primary"
-        />
+            Explora nuestros productos ✨
 
-        {/* CATEGORÍA */}
-        <select
-          value={categoria}
-          onChange={(e) => setCategoria(e.target.value)}
-          className="border px-4 py-2 rounded-xl focus:outline-none"
-        >
-          <option value="">Todas las categorías</option>
-          <option value="1">Maquillaje</option>
-          <option value="2">Skincare</option>
-          <option value="3">Cuidado capilar</option>
-          <option value="4">Fragancias</option>
-          <option value="5">Cuidado corporal</option>
-        </select>
+          </h1>
 
-        {/* RESULTADOS */}
-        <span className="text-sm text-gray-500">
-          {filtrados.length} productos
-        </span>
+          <p className="text-gray-600 text-lg">
 
-      </div>
+            Maquillaje, skincare,
+            belleza y mucho más
 
-      {/* ESTADO */}
-      {loading ? (
-        <p className="text-center text-gray-500">Cargando productos...</p>
-      ) : filtrados.length === 0 ? (
-        <div className="text-center text-gray-500">
-          <p>No se encontraron productos</p>
+          </p>
 
-          <button
-            onClick={() => {
-              setBusqueda("");
-              setCategoria("");
-            }}
-            className="mt-4 text-primary underline"
-          >
-            Limpiar filtros
-          </button>
         </div>
-      ) : (
-        <>
 
-          {/* GRID */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filtrados.map((producto) => (
-              <ProductCard
-                key={producto.id_producto}
-                producto={producto}
+        {/* LAYOUT */}
+        <div className="grid lg:grid-cols-4 gap-8">
+
+          {/* SIDEBAR */}
+          <aside className="bg-white rounded-3xl shadow-lg p-6 h-fit sticky top-8">
+
+            {/* BUSCADOR */}
+            <div className="mb-8">
+
+              <h2 className="font-bold text-xl mb-4">
+                Buscar
+              </h2>
+
+              <input
+                type="text"
+                placeholder="Buscar productos..."
+                value={busqueda}
+                onChange={(e) =>
+                  setBusqueda(
+                    e.target.value
+                  )
+                }
+                className="w-full border p-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary"
               />
-            ))}
-          </div>
 
-          {/* ASESORÍA */}
-          <div className="mt-16 text-center bg-gray-50 p-10 rounded-2xl border">
+            </div>
 
-            <h2 className="text-2xl font-bold text-primary">
-              ¿No encuentras lo que buscas?
-            </h2>
+            {/* CATEGORIAS */}
+            <div>
 
-            <p className="text-gray-600 mt-2">
-              Nuestro equipo te ayuda a elegir el producto perfecto para ti
-            </p>
+              <h2 className="font-bold text-xl mb-4">
+                Categorías
+              </h2>
 
-            <button className="mt-6 bg-secondary text-white px-6 py-3 rounded-xl hover-scale">
-              💬 Hablar con un asesor
+              <div className="space-y-3">
+
+                {/* TODAS */}
+                <button
+                  onClick={() =>
+                    setCategoriaSeleccionada(
+                      null
+                    )
+                  }
+                  className={`w-full text-left px-4 py-3 rounded-2xl transition
+                  ${
+                    categoriaSeleccionada ===
+                    null
+                      ? "bg-primary text-white"
+                      : "bg-gray-100 hover:bg-gray-200"
+                  }`}
+                >
+                  Todas
+                </button>
+
+                {/* CATEGORIAS */}
+                {categorias.map(
+                  (categoria) => (
+
+                  <button
+                    key={
+                      categoria.id_categoria
+                    }
+                    onClick={() =>
+                      setCategoriaSeleccionada(
+                        categoria.id_categoria
+                      )
+                    }
+                    className={`w-full text-left px-4 py-3 rounded-2xl transition
+                    ${
+                      categoriaSeleccionada ===
+                      categoria.id_categoria
+                        ? "bg-primary text-white"
+                        : "bg-gray-100 hover:bg-gray-200"
+                    }`}
+                  >
+
+                    {categoria.nombre}
+
+                  </button>
+                ))}
+
+              </div>
+
+            </div>
+
+            {/* LIMPIAR */}
+            <button
+              onClick={() => {
+
+                setBusqueda("");
+
+                setCategoriaSeleccionada(
+                  null
+                );
+              }}
+              className="mt-8 w-full bg-secondary text-white py-3 rounded-2xl"
+            >
+              Limpiar filtros
             </button>
 
-          </div>
+          </aside>
 
-        </>
-      )}
+          {/* PRODUCTOS */}
+          <section className="lg:col-span-3">
+
+            {/* TOPBAR */}
+            <div className="flex items-center justify-between mb-8">
+
+              <h2 className="text-2xl font-bold">
+
+                Productos
+
+              </h2>
+
+              <span className="text-gray-500">
+
+                {
+                  productosFiltrados.length
+                }
+                {" "}
+                resultados
+
+              </span>
+
+            </div>
+
+            {/* LOADING */}
+            {loading ? (
+
+              <div className="text-center py-20">
+
+                <p className="text-gray-500 text-lg">
+                  Cargando productos...
+                </p>
+
+              </div>
+
+            ) : productosFiltrados.length === 0 ? (
+
+              <div className="bg-white rounded-3xl shadow-lg p-16 text-center">
+
+                <h3 className="text-2xl font-bold mb-4">
+                  No encontramos productos
+                </h3>
+
+                <p className="text-gray-500">
+
+                  Intenta cambiar los filtros
+                  o la búsqueda
+
+                </p>
+
+              </div>
+
+            ) : (
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                {productosFiltrados.map(
+                  (producto) => (
+
+                  <ProductCard
+                    key={
+                      producto.id_producto
+                    }
+                    producto={producto}
+                  />
+                ))}
+
+              </div>
+            )}
+
+            {/* CTA */}
+            <div className="mt-16 bg-white rounded-3xl shadow-lg p-10 text-center">
+
+              <h2 className="text-3xl font-bold text-primary mb-4">
+
+                ¿Necesitas ayuda?
+
+              </h2>
+
+              <p className="text-gray-600 mb-6">
+
+                Nuestro equipo puede ayudarte
+                a encontrar el producto ideal
+
+              </p>
+
+              <button className="bg-secondary text-white px-8 py-4 rounded-2xl text-lg hover:opacity-90 transition">
+
+                💬 Hablar con un asesor
+
+              </button>
+
+            </div>
+
+          </section>
+
+        </div>
+
+      </div>
 
     </main>
   );
