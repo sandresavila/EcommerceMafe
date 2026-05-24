@@ -1,6 +1,6 @@
 import { Producto } from "@/types/producto";
 
-const API_URL = "http://localhost:4000/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;;
 
 // 🔹 Obtener TODOS los productos
 export const getProductos = async (): Promise<Producto[]> => {

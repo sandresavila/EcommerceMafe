@@ -106,7 +106,7 @@ export const createProducto =
 
       const imagen_url =
         req.file
-          ? `http://localhost:4000/uploads/${req.file.filename}`
+          ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}`
           : null;
 
       // =====================================
@@ -228,7 +228,7 @@ export const updateProducto =
       if (req.file) {
 
         imagen_url =
-          `http://localhost:4000/uploads/${req.file.filename}`;
+          `${process.env.BACKEND_URL}/uploads/${req.file.filename}`
       }
 
       // =====================================

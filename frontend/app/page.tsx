@@ -48,7 +48,7 @@ export default function Home() {
   useEffect(() => {
 
     fetch(
-      "http://localhost:4000/api/productos"
+      `${process.env.NEXT_PUBLIC_API_URL}/productos`
     )
       .then((res) =>
         res.json()

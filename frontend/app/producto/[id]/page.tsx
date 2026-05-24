@@ -14,7 +14,7 @@ export default function ProductoPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:4000/api/productos/${id}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/productos/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setProducto(data);
