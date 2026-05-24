@@ -31,6 +31,8 @@ import {
   useAuth,
 } from "@/context/AuthContext";
 
+import Image from "next/image";
+
 export default function Navbar() {
 
   const { cart } =
@@ -240,9 +242,16 @@ export default function Navbar() {
 
               <div className="flex items-center gap-3">
 
-                <div className="w-11 h-11 rounded-2xl bg-brand-gradient text-white flex items-center justify-center shadow-xl">
+                <div className="w-24 h-14 rounded-full overflow-hidden shadow-lg border border-pink-100 bg-white flex items-center justify-center px-2">
 
-                  <Sparkles className="w-5 h-5" />
+                  <Image
+                    src="/logo2.png"
+                    alt="MAFE Logo"
+                    width={90}
+                    height={50}
+                    className="object-contain"
+                    priority
+                  />
 
                 </div>
 

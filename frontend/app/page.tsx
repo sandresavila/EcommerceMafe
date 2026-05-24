@@ -101,7 +101,7 @@ export default function Home() {
 
         {/* BG */}
         <Image
-          src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9"
+          src="/fondo3.jpeg"
           alt="Beauty"
           fill
           priority
@@ -268,13 +268,14 @@ export default function Home() {
                 </div>
 
                 {/* IMAGE */}
-                <Image
-                  src="https://images.unsplash.com/photo-1515377905703-c4788e51af15"
-                  alt="Beauty"
-                  width={500}
-                  height={500}
-                  className="rounded-[2rem] h-[320px] object-cover"
-                />
+                <video
+                  src="/Video iluminador mafe.mp4"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="rounded-[2rem] h-[320px] w-full object-cover"
+                ></video>
 
                 {/* FOOTER */}
                 <div className="mt-8 flex items-center justify-between">

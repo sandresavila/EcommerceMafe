@@ -288,7 +288,7 @@ export default function ProductCard({
           <span className="text-primary font-bold text-xl">
 
             {formatPrice(
-              producto.precio
+              Number(producto.precio)
             )}
 
           </span>
