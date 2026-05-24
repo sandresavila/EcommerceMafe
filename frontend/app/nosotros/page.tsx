@@ -89,7 +89,7 @@ export default function NosotrosPage() {
               <div className="relative card-modern overflow-hidden p-3">
 
                 <Image
-                  src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9"
+                  src="/final.jpeg"
                   alt="Belleza MAFE"
                   width={800}
                   height={700}
