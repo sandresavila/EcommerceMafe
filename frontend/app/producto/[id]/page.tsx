@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { Producto } from "@/types/producto";
 import { useParams } from "next/navigation";
+import Image from "next/image";
 
 export default function ProductoPage() {
   const { id } = useParams();
@@ -51,11 +52,12 @@ export default function ProductoPage() {
             </span>
           )}
 
-          <img
+          <Image
             src={producto.imagen_url}
             alt={producto.nombre}
-            className="w-full h-[450px] object-cover rounded-xl"
-          />
+            width={900}
+            height={900}
+            className="w-full h-[450px] object-cover rounded-xl"          />
         </div>
 
         {/* INFO */}

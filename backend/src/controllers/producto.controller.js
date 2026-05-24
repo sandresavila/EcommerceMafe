@@ -20,7 +20,7 @@ export const getProductos =
           LEFT JOIN categorias c
           ON p.id_categoria = c.id_categoria
 
-          ORDER BY p.fecha_creacion DESC
+          ORDER BY p.id_producto DESC
           `
         );
 

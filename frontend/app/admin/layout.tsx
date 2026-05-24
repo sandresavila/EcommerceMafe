@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 
-import { useRouter } from "next/navigation";
+import {
+  useRouter,
+  usePathname,
+} from "next/navigation";
 
 import {
   useEffect,
@@ -15,6 +18,7 @@ import {
   ShoppingBag,
   Users,
   LogOut,
+  Folder,
 } from "lucide-react";
 
 import {
@@ -27,147 +31,240 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
 
-  const router = useRouter();
+  const router =
+    useRouter();
 
-  const [mounted, setMounted] =
-  useState(false);
+  const pathname =
+    usePathname();
+
+  const [mounted,
+    setMounted] =
+      useState(false);
 
   const {
     usuario,
     logout,
   } = useAuth();
 
+  // =====================================
+  // MOUNTED
+  // =====================================
+
   useEffect(() => {
 
-  setMounted(true);
+    const timer =
+      setTimeout(() => {
 
-}, []);
+        setMounted(true);
 
+      }, 0);
+
+    return () =>
+      clearTimeout(timer);
+
+  }, []);
+
+  // =====================================
   // PROTEGER ADMIN
+  // =====================================
+
   useEffect(() => {
+
+    if (!mounted) return;
 
     if (!usuario) {
+
       router.push("/");
+
       return;
     }
 
-    if (usuario.rol !== "admin") {
+    if (
+      usuario.rol !== "admin"
+    ) {
+
       router.push("/");
     }
 
-  }, [usuario, router]);
+  }, [
+    mounted,
+    usuario,
+    router,
+  ]);
 
-  if (!mounted) return null;
+  // =====================================
+  // LOADING SSR
+  // =====================================
 
-  if (!usuario) return null;
+  if (
+    !mounted ||
+    !usuario
+  ) {
+
+    return null;
+  }
+
+  // =====================================
+  // LINKS
+  // =====================================
+
+  const links = [
+
+    {
+      href: "/admin",
+      label: "Dashboard",
+      icon: LayoutDashboard,
+    },
+
+    {
+      href: "/admin/productos",
+      label: "Productos",
+      icon: Package,
+    },
+
+    {
+      href: "/admin/pedidos",
+      label: "Pedidos",
+      icon: ShoppingBag,
+    },
+
+    {
+      href: "/admin/categorias",
+      label: "Categorías",
+      icon: Folder,
+    },
+
+    {
+      href: "/admin/usuarios",
+      label: "Usuarios",
+      icon: Users,
+    },
+  ];
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
+    <div className="min-h-screen bg-gray-100 flex">
 
       {/* SIDEBAR */}
-      <aside className="w-72 bg-white shadow-xl p-6 flex flex-col">
+      <aside className="w-72 bg-white border-r border-gray-200 shadow-sm flex flex-col">
 
-        {/* LOGO */}
-        <div className="mb-10">
+        {/* HEADER */}
+        <div className="p-8 border-b">
 
-          <h1 className="text-3xl font-bold text-primary">
-            MAFE Admin
+          <h1 className="text-4xl font-black">
+
+            <span className="text-primary">
+              MAFE
+            </span>
+
+            <span className="text-dark">
+              Admin
+            </span>
+
           </h1>
 
-          <p className="text-gray-500 mt-2">
+          <p className="text-gray-500 mt-3">
             Panel administrativo
           </p>
 
         </div>
 
         {/* NAV */}
-        <nav className="flex flex-col gap-3">
+        <nav className="flex-1 p-5 space-y-2 overflow-y-auto">
 
-          {/* DASHBOARD */}
-          <Link
-            href="/admin"
-            className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-100 transition"
-          >
-            <LayoutDashboard className="w-5 h-5" />
+          {links.map((link) => {
 
-            Dashboard
-          </Link>
+            const Icon =
+              link.icon;
 
-          {/* PRODUCTOS */}
-          <Link
-            href="/admin/productos"
-            className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-100 transition"
-          >
-            <Package className="w-5 h-5" />
+            const active =
+              pathname ===
+              link.href;
 
-            Productos
-          </Link>
+            return (
 
-          {/* PEDIDOS */}
-          <Link
-            href="/admin/pedidos"
-            className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-100 transition"
-          >
-            <ShoppingBag className="w-5 h-5" />
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`
+                  flex items-center gap-4 px-5 py-4 rounded-2xl transition font-medium
+                  ${
+                    active
+                      ? "bg-primary text-white shadow-lg"
+                      : "hover:bg-gray-100 text-gray-700"
+                  }
+                `}
+              >
 
-            Pedidos
-          </Link>
+                <Icon className="w-5 h-5" />
 
-          {/* USUARIOS */}
-          <Link
-            href="/admin/usuarios"
-            className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-100 transition"
-          >
-            <Users className="w-5 h-5" />
+                {link.label}
 
-            Usuarios
-          </Link>
+              </Link>
+            );
+          })}
 
         </nav>
 
         {/* USER */}
-        <div className="mt-auto border-t pt-6">
+        <div className="p-5 border-t">
 
-          <div className="flex items-center gap-3 mb-4">
+          <div className="bg-gray-50 rounded-3xl p-5">
 
-            <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg">
-              {usuario.nombre.charAt(0)}
+            {/* INFO */}
+            <div className="flex items-center gap-4">
+
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-pink-400 text-white flex items-center justify-center font-black text-xl shadow-lg">
+
+                {usuario.nombre.charAt(0)}
+
+              </div>
+
+              <div>
+
+                <p className="font-bold">
+
+                  {usuario.nombre}
+
+                </p>
+
+                <p className="text-sm text-gray-500 capitalize">
+
+                  {usuario.rol}
+
+                </p>
+
+              </div>
+
             </div>
 
-            <div>
+            {/* LOGOUT */}
+            <button
+              onClick={() => {
 
-              <p className="font-semibold">
-                {usuario.nombre}
-              </p>
+                logout();
 
-              <p className="text-sm text-gray-500">
-                {usuario.rol}
-              </p>
+                router.push("/");
+              }}
+              className="mt-5 w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 transition text-white py-3 rounded-2xl font-semibold"
+            >
 
-            </div>
+              <LogOut className="w-5 h-5" />
+
+              Cerrar sesión
+
+            </button>
 
           </div>
-
-          {/* LOGOUT */}
-          <button
-            onClick={() => {
-              logout();
-              router.push("/");
-            }}
-            className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-3 rounded-2xl hover:bg-red-600 transition"
-          >
-            <LogOut className="w-5 h-5" />
-
-            Cerrar sesión
-          </button>
 
         </div>
 
       </aside>
 
-      {/* CONTENIDO */}
-      <main className="flex-1 p-8">
+      {/* CONTENT */}
+      <main className="flex-1 overflow-y-auto p-8">
+
         {children}
+
       </main>
 
     </div>

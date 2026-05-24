@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   useState,
   useEffect,
+  useRef,
 } from "react";
 
 import {
@@ -14,6 +15,12 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  Package,
+  Heart,
+  Search,
+  ChevronDown,
+  Sparkles,
+  ShoppingBag,
 } from "lucide-react";
 
 import {
@@ -43,6 +50,14 @@ export default function Navbar() {
     setMobileMenu] =
       useState(false);
 
+  const [showUserMenu,
+    setShowUserMenu] =
+      useState(false);
+
+  const [scrolled,
+    setScrolled] =
+      useState(false);
+
   const [correo,
     setCorreo] =
       useState("");
@@ -63,9 +78,80 @@ export default function Navbar() {
     setMounted] =
       useState(false);
 
+  const menuRef =
+    useRef<HTMLDivElement>(null);
+
+  // =====================================
+  // MOUNT
+  // =====================================
+
   useEffect(() => {
 
     setMounted(true);
+
+  }, []);
+
+  // =====================================
+  // SCROLL EFFECT
+  // =====================================
+
+  useEffect(() => {
+
+    const handleScroll =
+      () => {
+
+        setScrolled(
+          window.scrollY > 10
+        );
+      };
+
+    window.addEventListener(
+      "scroll",
+      handleScroll
+    );
+
+    return () =>
+      window.removeEventListener(
+        "scroll",
+        handleScroll
+      );
+
+  }, []);
+
+  // =====================================
+  // CLOSE DROPDOWN
+  // =====================================
+
+  useEffect(() => {
+
+    const handleClickOutside =
+      (
+        event: MouseEvent
+      ) => {
+
+        if (
+          menuRef.current &&
+          !menuRef.current.contains(
+            event.target as Node
+          )
+        ) {
+
+          setShowUserMenu(false);
+        }
+      };
+
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+    return () => {
+
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+    };
 
   }, []);
 
@@ -124,90 +210,132 @@ export default function Navbar() {
 
   return (
     <>
+
+      {/* ===================================== */}
       {/* NAVBAR */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 border-b border-white/20 shadow-sm">
+      {/* ===================================== */}
 
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <header
+        className={`sticky top-0 z-50 transition-all duration-300
+        ${
+          scrolled
+            ? "bg-white/85 backdrop-blur-2xl shadow-lg border-b border-white/20"
+            : "bg-white/70 backdrop-blur-xl"
+        }`}
+      >
 
-          {/* LOGO */}
-          <Link
-            href="/"
-            className="text-3xl font-black tracking-tight"
-          >
+        <div className="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
 
-            <span className="text-primary">
-              MAFE
-            </span>
+          {/* ===================================== */}
+          {/* LEFT */}
+          {/* ===================================== */}
 
-            <span className="text-dark">
-              Beauty
-            </span>
+          <div className="flex items-center gap-10">
 
-          </Link>
-
-          {/* NAV DESKTOP */}
-          <nav className="hidden lg:flex items-center gap-8 font-medium text-gray-700">
-
+            {/* LOGO */}
             <Link
               href="/"
-              className="hover:text-primary transition"
+              className="relative group"
             >
-              Inicio
+
+              <div className="flex items-center gap-3">
+
+                <div className="w-11 h-11 rounded-2xl bg-brand-gradient text-white flex items-center justify-center shadow-xl">
+
+                  <Sparkles className="w-5 h-5" />
+
+                </div>
+
+                <div className="leading-tight">
+
+                  <h1 className="text-2xl font-black tracking-tight">
+
+                    <span className="text-primary">
+                      MAFE
+                    </span>
+
+                    <span className="text-dark">
+                      Beauty
+                    </span>
+
+                  </h1>
+
+                  <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 font-semibold">
+
+                    Beauty Store
+
+                  </p>
+
+                </div>
+
+              </div>
+
             </Link>
 
+            {/* NAV DESKTOP */}
+            <nav className="hidden lg:flex items-center gap-2">
+
+              {[
+                {
+                  label: "Inicio",
+                  href: "/",
+                },
+                {
+                  label: "Productos",
+                  href: "/productos",
+                },
+                {
+                  label: "Nosotros",
+                  href: "/nosotros",
+                },
+                {
+                  label: "Contacto",
+                  href: "/contacto",
+                },
+              ].map((item) => (
+
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="px-5 py-3 rounded-2xl text-gray-700 font-medium hover:bg-primary/10 hover:text-primary transition"
+                >
+
+                  {item.label}
+
+                </Link>
+              ))}
+
+            </nav>
+
+          </div>
+
+          {/* ===================================== */}
+          {/* RIGHT */}
+          {/* ===================================== */}
+
+          <div className="flex items-center gap-3 md:gap-4">
+
+            {/* SEARCH */}
             <Link
               href="/productos"
-              className="hover:text-primary transition"
+              className="hidden md:flex w-11 h-11 rounded-2xl bg-gray-100 hover:bg-primary hover:text-white transition items-center justify-center"
             >
-              Productos
+
+              <Search className="w-5 h-5" />
+
             </Link>
 
-            <Link
-              href="/nosotros"
-              className="hover:text-primary transition"
-            >
-              Nosotros
-            </Link>
-
-            <Link
-              href="/contacto"
-              className="hover:text-primary transition"
-            >
-              Contacto
-            </Link>
-
-          </nav>
-
-          {/* ACTIONS */}
-          <div className="flex items-center gap-4">
-
-            {/* ADMIN BTN */}
-            {usuario?.rol ===
-              "admin" && (
-
-              <Link
-                href="/admin"
-                className="hidden md:flex items-center gap-2 bg-primary/10 text-primary px-5 py-2.5 rounded-2xl font-semibold hover:bg-primary hover:text-white transition"
-              >
-
-                <LayoutDashboard className="w-4 h-4" />
-
-                Panel Admin
-
-              </Link>
-            )}
-
-            {/* CARRITO */}
+            {/* CART */}
             <Link
               href="/carrito"
-              className="relative hover:scale-110 transition"
+              className="relative w-11 h-11 rounded-2xl bg-gray-100 hover:bg-primary hover:text-white transition flex items-center justify-center"
             >
 
-              <ShoppingCart className="w-6 h-6 text-gray-700" />
+              <ShoppingCart className="w-5 h-5" />
 
               {totalItems > 0 && (
 
-                <span className="absolute -top-2 -right-2 bg-primary text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-semibold">
+                <span className="absolute -top-2 -right-2 bg-primary text-white text-xs min-w-[22px] h-[22px] rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-white px-1">
 
                   {totalItems}
 
@@ -216,42 +344,183 @@ export default function Navbar() {
 
             </Link>
 
-            {/* USUARIO */}
+            {/* USER */}
             {usuario ? (
 
-              <div className="flex items-center gap-4">
+              <div
+                className="relative"
+                ref={menuRef}
+              >
 
-                {/* AVATAR */}
-                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-pink-400 text-white flex items-center justify-center font-bold shadow-lg">
-
-                  {usuario.nombre.charAt(0)}
-
-                </div>
-
-                {/* INFO */}
-                <div className="hidden md:flex flex-col">
-
-                  <span className="font-semibold text-sm">
-                    {usuario.nombre}
-                  </span>
-
-                  <span className="text-xs text-gray-500 capitalize">
-                    {usuario.rol}
-                  </span>
-
-                </div>
-
-                {/* LOGOUT */}
+                {/* BTN */}
                 <button
-                  onClick={logout}
-                  className="hidden md:flex items-center gap-2 border px-4 py-2 rounded-2xl hover:bg-gray-100 transition text-sm"
+                  onClick={() =>
+                    setShowUserMenu(
+                      !showUserMenu
+                    )
+                  }
+                  className="flex items-center gap-3 bg-gray-100 hover:bg-gray-200 transition px-3 py-2 rounded-2xl"
                 >
 
-                  <LogOut className="w-4 h-4" />
+                  {/* AVATAR */}
+                  <div className="w-11 h-11 rounded-2xl bg-brand-gradient text-white flex items-center justify-center font-black shadow-lg">
 
-                  Salir
+                    {usuario.nombre.charAt(0)}
+
+                  </div>
+
+                  {/* INFO */}
+                  <div className="hidden md:flex flex-col text-left">
+
+                    <span className="font-bold text-sm text-dark">
+
+                      {usuario.nombre}
+
+                    </span>
+
+                    <span className="text-xs text-gray-500 capitalize">
+
+                      {usuario.rol}
+
+                    </span>
+
+                  </div>
+
+                  <ChevronDown className="hidden md:block w-4 h-4 text-gray-400" />
 
                 </button>
+
+                {/* MENU */}
+                {showUserMenu && (
+
+                  <div className="absolute right-0 mt-4 w-80 bg-white rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden animate-fade-in">
+
+                    {/* TOP */}
+                    <div className="bg-brand-gradient p-6 text-white relative overflow-hidden">
+
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
+
+                      <div className="relative z-10">
+
+                        <div className="flex items-center gap-4">
+
+                          <div className="w-16 h-16 rounded-3xl bg-white/20 backdrop-blur flex items-center justify-center text-2xl font-black">
+
+                            {usuario.nombre.charAt(0)}
+
+                          </div>
+
+                          <div>
+
+                            <h3 className="font-black text-xl">
+
+                              {usuario.nombre}
+
+                            </h3>
+
+                            <p className="text-white/80 text-sm mt-1">
+
+                              {usuario.correo}
+
+                            </p>
+
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                    {/* LINKS */}
+                    <div className="p-4 space-y-2">
+
+                      <Link
+                        href="/perfil"
+                        onClick={() =>
+                          setShowUserMenu(false)
+                        }
+                        className="flex items-center gap-4 px-5 py-4 rounded-2xl hover:bg-gray-100 transition font-medium"
+                      >
+
+                        <User className="w-5 h-5 text-primary" />
+
+                        Mi perfil
+
+                      </Link>
+
+                      <Link
+                        href="/favoritos"
+                        onClick={() =>
+                          setShowUserMenu(false)
+                        }
+                        className="flex items-center gap-4 px-5 py-4 rounded-2xl hover:bg-gray-100 transition font-medium"
+                      >
+
+                        <Heart className="w-5 h-5 text-primary" />
+
+                        Favoritos
+
+                      </Link>
+
+                      <Link
+                        href="/mis-pedidos"
+                        onClick={() =>
+                          setShowUserMenu(false)
+                        }
+                        className="flex items-center gap-4 px-5 py-4 rounded-2xl hover:bg-gray-100 transition font-medium"
+                      >
+
+                        <Package className="w-5 h-5 text-primary" />
+
+                        Mis pedidos
+
+                      </Link>
+
+                      {/* ADMIN */}
+                      {usuario.rol ===
+                        "admin" && (
+
+                        <Link
+                          href="/admin"
+                          onClick={() =>
+                            setShowUserMenu(false)
+                          }
+                          className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-primary/10 hover:bg-primary hover:text-white text-primary font-bold transition"
+                        >
+
+                          <LayoutDashboard className="w-5 h-5" />
+
+                          Panel administrador
+
+                        </Link>
+                      )}
+
+                    </div>
+
+                    {/* LOGOUT */}
+                    <div className="p-4 border-t border-gray-100">
+
+                      <button
+                        onClick={() => {
+
+                          logout();
+
+                          setShowUserMenu(false);
+                        }}
+                        className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl hover:bg-red-50 text-red-500 transition font-semibold"
+                      >
+
+                        <LogOut className="w-5 h-5" />
+
+                        Cerrar sesión
+
+                      </button>
+
+                    </div>
+
+                  </div>
+                )}
 
               </div>
 
@@ -261,7 +530,7 @@ export default function Navbar() {
                 onClick={() =>
                   setShowLogin(true)
                 }
-                className="hidden md:flex items-center gap-2 bg-primary hover:scale-105 transition text-white px-5 py-3 rounded-2xl shadow-lg"
+                className="hidden md:flex items-center gap-3 bg-primary hover:opacity-90 text-white px-6 py-3 rounded-2xl shadow-xl transition font-bold"
               >
 
                 <User className="w-5 h-5" />
@@ -278,10 +547,17 @@ export default function Navbar() {
                   !mobileMenu
                 )
               }
-              className="lg:hidden"
+              className="lg:hidden w-11 h-11 rounded-2xl bg-gray-100 flex items-center justify-center"
             >
 
-              <Menu className="w-7 h-7" />
+              {mobileMenu ? (
+
+                <X className="w-6 h-6" />
+
+              ) : (
+
+                <Menu className="w-6 h-6" />
+              )}
 
             </button>
 
@@ -289,73 +565,91 @@ export default function Navbar() {
 
         </div>
 
+        {/* ===================================== */}
         {/* MOBILE MENU */}
+        {/* ===================================== */}
+
         {mobileMenu && (
 
-          <div className="lg:hidden bg-white border-t px-6 py-6 space-y-5 shadow-xl">
+          <div className="lg:hidden border-t border-gray-100 bg-white px-4 py-5 animate-fade-in">
 
-            <Link
-              href="/"
-              className="block"
-            >
-              Inicio
-            </Link>
+            <div className="space-y-2">
 
-            <Link
-              href="/productos"
-              className="block"
-            >
-              Productos
-            </Link>
-
-            <Link
-              href="/nosotros"
-              className="block"
-            >
-              Nosotros
-            </Link>
-
-            <Link
-              href="/contacto"
-              className="block"
-            >
-              Contacto
-            </Link>
-
-            {/* ADMIN */}
-            {usuario?.rol ===
-              "admin" && (
-
-              <>
-                <hr />
+              {[
+                {
+                  label: "Inicio",
+                  href: "/",
+                },
+                {
+                  label: "Productos",
+                  href: "/productos",
+                },
+                {
+                  label: "Nosotros",
+                  href: "/nosotros",
+                },
+                {
+                  label: "Contacto",
+                  href: "/contacto",
+                },
+              ].map((item) => (
 
                 <Link
-                  href="/admin/dashboard"
-                  className="block text-primary font-semibold"
+                  key={item.href}
+                  href={item.href}
+                  onClick={() =>
+                    setMobileMenu(false)
+                  }
+                  className="flex items-center gap-3 px-5 py-4 rounded-2xl hover:bg-gray-100 transition font-medium"
                 >
-                  Panel Admin
+
+                  <ShoppingBag className="w-5 h-5 text-primary" />
+
+                  {item.label}
+
                 </Link>
-              </>
-            )}
+              ))}
+
+              {!usuario && (
+
+                <button
+                  onClick={() => {
+
+                    setShowLogin(true);
+
+                    setMobileMenu(false);
+                  }}
+                  className="w-full mt-4 bg-primary text-white py-4 rounded-2xl font-bold"
+                >
+
+                  Iniciar sesión
+
+                </button>
+              )}
+
+            </div>
 
           </div>
         )}
 
       </header>
 
-      {/* MODAL LOGIN */}
+      {/* ===================================== */}
+      {/* LOGIN MODAL */}
+      {/* ===================================== */}
+
       {showLogin && (
 
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">
 
-          <div className="bg-white w-full max-w-md rounded-[2rem] p-10 relative shadow-2xl animate-fade-in">
+          <div className="bg-white w-full max-w-md rounded-[2.5rem] p-10 relative shadow-2xl fade-in">
 
             {/* CLOSE */}
             <button
               onClick={() =>
                 setShowLogin(false)
               }
-              className="absolute top-5 right-5 hover:scale-110 transition"
+              className="absolute top-5 right-5 w-10 h-10 rounded-xl hover:bg-gray-100 flex items-center justify-center transition"
             >
 
               <X className="w-5 h-5" />
@@ -363,20 +657,30 @@ export default function Navbar() {
             </button>
 
             {/* HEADER */}
-            <div className="text-center mb-8">
+            <div className="text-center mb-10">
 
-              <h2 className="text-4xl font-black">
+              <div className="w-20 h-20 mx-auto rounded-[2rem] bg-brand-gradient text-white flex items-center justify-center shadow-xl mb-6">
+
+                <Sparkles className="w-9 h-9" />
+
+              </div>
+
+              <h2 className="text-4xl font-black text-dark">
+
                 Bienvenido ✨
+
               </h2>
 
-              <p className="text-gray-500 mt-3">
+              <p className="text-gray-500 mt-3 text-lg">
+
                 Inicia sesión para continuar
+
               </p>
 
             </div>
 
             {/* INPUTS */}
-            <div className="space-y-4">
+            <div className="space-y-5">
 
               <input
                 type="email"
@@ -387,7 +691,7 @@ export default function Navbar() {
                     e.target.value
                   )
                 }
-                className="w-full border-2 border-gray-200 focus:border-primary outline-none p-4 rounded-2xl"
+                className="w-full bg-gray-50 border-2 border-gray-200 focus:border-primary focus:bg-white outline-none p-5 rounded-2xl transition"
               />
 
               <input
@@ -399,7 +703,7 @@ export default function Navbar() {
                     e.target.value
                   )
                 }
-                className="w-full border-2 border-gray-200 focus:border-primary outline-none p-4 rounded-2xl"
+                className="w-full bg-gray-50 border-2 border-gray-200 focus:border-primary focus:bg-white outline-none p-5 rounded-2xl transition"
               />
 
             </div>
@@ -407,7 +711,7 @@ export default function Navbar() {
             {/* ERROR */}
             {error && (
 
-              <p className="text-red-500 text-sm mt-3">
+              <p className="text-red-500 text-sm mt-4 font-medium">
 
                 {error}
 
@@ -418,7 +722,7 @@ export default function Navbar() {
             <button
               onClick={handleLogin}
               disabled={loading}
-              className="w-full mt-6 bg-primary hover:opacity-90 transition text-white py-4 rounded-2xl font-bold text-lg"
+              className="w-full mt-8 bg-primary hover:opacity-90 transition text-white py-5 rounded-2xl font-black text-lg shadow-xl"
             >
 
               {loading
@@ -427,10 +731,31 @@ export default function Navbar() {
 
             </button>
 
+            {/* REGISTER */}
+            <p className="text-center text-gray-500 mt-7">
+
+              ¿No tienes cuenta?
+              {" "}
+
+              <Link
+                href="/register"
+                className="text-primary font-bold hover:underline"
+                onClick={() =>
+                  setShowLogin(false)
+                }
+              >
+
+                Crea cuenta
+
+              </Link>
+
+            </p>
+
           </div>
 
         </div>
       )}
+
     </>
   );
 }

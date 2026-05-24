@@ -26,6 +26,13 @@ import pedidoRoutes
 import categoriaRoutes
   from "./routes/categoria.routes.js";
 
+import favoritoRoutes
+  from "./routes/favoritos.routes.js";
+
+import analyticsRoutes
+  from "./routes/analytics.routes.js"; 
+
+
 dotenv.config();
 
 const PORT =
@@ -74,6 +81,16 @@ app.use(
 app.use(
   "/api/categorias",
   categoriaRoutes
+);
+
+app.use(
+  "/api/favoritos",
+  favoritoRoutes
+);
+
+app.use(
+  "/api/analytics",
+  analyticsRoutes
 );
 
 // =====================================

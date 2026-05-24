@@ -9,17 +9,34 @@ import {
 
 import axios from "axios";
 
-import { Producto } from "@/types/producto";
+import {
+  toast,
+} from "sonner";
 
-import { useAuth } from "@/context/AuthContext";
+import {
+  Producto,
+} from "@/types/producto";
 
-// 🧩 ITEM CARRITO
-interface CartItem extends Producto {
+import {
+  useAuth,
+} from "@/context/AuthContext";
+
+// =====================================
+// ITEM CARRITO
+// =====================================
+
+interface CartItem
+  extends Producto {
+
   cantidad: number;
 }
 
-// 🧠 CONTEXTO
+// =====================================
+// CONTEXTO
+// =====================================
+
 interface CartContextType {
+
   cart: CartItem[];
 
   addToCart: (
@@ -41,41 +58,53 @@ interface CartContextType {
   clearCart: () => Promise<void>;
 }
 
-const CartContext = createContext<
-  CartContextType | undefined
->(undefined);
+const CartContext =
+  createContext<
+    CartContextType | undefined
+  >(undefined);
 
-// 🚀 PROVIDER
+// =====================================
+// PROVIDER
+// =====================================
+
 export function CartProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
 
-  const { token, usuario } =
-    useAuth();
+  const {
+    token,
+    usuario,
+  } = useAuth();
 
-  const [cart, setCart] =
-    useState<CartItem[]>([]);
+  const [cart,
+    setCart] =
+      useState<CartItem[]>([]);
 
   const API_URL =
-    `${process.env.NEXT_PUBLIC_API_URL}/carrito`;
+    process.env.NEXT_PUBLIC_API_URL;
 
   // =====================================
   // CARGAR CARRITO
   // =====================================
+
   useEffect(() => {
 
     const cargarCarrito =
       async () => {
 
+        // =====================================
         // USUARIO LOGUEADO
+        // =====================================
+
         if (token) {
+
           try {
 
             const response =
               await axios.get(
-                API_URL,
+                `${API_URL}/carrito`,
                 {
                   headers: {
                     Authorization:
@@ -84,15 +113,25 @@ export function CartProvider({
                 }
               );
 
-            setCart(response.data);
+            setCart(
+              response.data
+            );
 
           } catch (error) {
+
             console.error(error);
+
+            toast.error(
+              "Error cargando carrito"
+            );
           }
 
         } else {
 
-          // LOCALSTORAGE
+          // =====================================
+          // LOCAL STORAGE
+          // =====================================
+
           const storedCart =
             localStorage.getItem(
               "cart"
@@ -100,7 +139,9 @@ export function CartProvider({
 
           setCart(
             storedCart
-              ? JSON.parse(storedCart)
+              ? JSON.parse(
+                  storedCart
+                )
               : []
           );
         }
@@ -108,14 +149,16 @@ export function CartProvider({
 
     cargarCarrito();
 
-  }, [token]);
+  }, [token, API_URL]);
 
   // =====================================
   // GUARDAR LOCAL
   // =====================================
+
   useEffect(() => {
 
     if (!usuario) {
+
       localStorage.setItem(
         "cart",
         JSON.stringify(cart)
@@ -127,30 +170,128 @@ export function CartProvider({
   // =====================================
   // AGREGAR PRODUCTO
   // =====================================
-  const addToCart = async (
-    producto: Producto
-  ) => {
 
-    // USUARIO LOGUEADO
-    if (token) {
+  const addToCart =
+    async (
+      producto: Producto
+    ) => {
 
-      try {
+      // =====================================
+      // STOCK
+      // =====================================
 
-        await axios.post(
-          API_URL,
-          {
-            id_producto:
-              producto.id_producto,
+      if (
+        producto.stock <= 0
+      ) {
 
-            cantidad: 1,
-          },
-          {
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
+        toast.error(
+          "Producto agotado"
         );
+
+        return;
+      }
+
+      // =====================================
+      // VALIDAR LIMITE
+      // =====================================
+
+      const existente =
+        cart.find(
+          (item) =>
+            item.id_producto ===
+            producto.id_producto
+        );
+
+      if (
+        existente &&
+        existente.cantidad >=
+        producto.stock
+      ) {
+
+        toast.warning(
+          "No hay más stock disponible"
+        );
+
+        return;
+      }
+
+      // =====================================
+      // USUARIO LOGUEADO
+      // =====================================
+
+      if (token) {
+
+        try {
+
+          await axios.post(
+            `${API_URL}/carrito`,
+            {
+              id_producto:
+                producto.id_producto,
+
+              cantidad: 1,
+            },
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          );
+
+          setCart((prev) => {
+
+            const existe =
+              prev.find(
+                (item) =>
+                  item.id_producto ===
+                  producto.id_producto
+              );
+
+            // YA EXISTE
+            if (existe) {
+
+              return prev.map(
+                (item) =>
+                  item.id_producto ===
+                  producto.id_producto
+                    ? {
+                        ...item,
+                        cantidad:
+                          item.cantidad + 1,
+                      }
+                    : item
+              );
+            }
+
+            // NUEVO
+            return [
+              ...prev,
+              {
+                ...producto,
+                cantidad: 1,
+              },
+            ];
+          });
+
+          toast.success(
+            `${producto.nombre} agregado al carrito`
+          );
+
+        } catch (error) {
+
+          console.error(error);
+
+          toast.error(
+            "Error agregando producto"
+          );
+        }
+
+      } else {
+
+        // =====================================
+        // LOCAL STORAGE
+        // =====================================
 
         setCart((prev) => {
 
@@ -161,6 +302,7 @@ export function CartProvider({
                 producto.id_producto
             );
 
+          // YA EXISTE
           if (existe) {
 
             return prev.map(
@@ -176,6 +318,7 @@ export function CartProvider({
             );
           }
 
+          // NUEVO
           return [
             ...prev,
             {
@@ -185,137 +328,31 @@ export function CartProvider({
           ];
         });
 
-      } catch (error) {
-        console.error(error);
+        toast.success(
+          `${producto.nombre} agregado al carrito`
+        );
       }
-
-    } else {
-
-      // LOCAL
-      setCart((prev) => {
-
-        const existe =
-          prev.find(
-            (item) =>
-              item.id_producto ===
-              producto.id_producto
-          );
-
-        if (existe) {
-
-          return prev.map(
-            (item) =>
-              item.id_producto ===
-              producto.id_producto
-                ? {
-                    ...item,
-                    cantidad:
-                      item.cantidad + 1,
-                  }
-                : item
-          );
-        }
-
-        return [
-          ...prev,
-          {
-            ...producto,
-            cantidad: 1,
-          },
-        ];
-      });
-    }
-  };
+    };
 
   // =====================================
   // ELIMINAR PRODUCTO
   // =====================================
-  const removeFromCart = async (
-    id: number
-  ) => {
 
-    // BACKEND
-    if (token) {
+  const removeFromCart =
+    async (
+      id: number
+    ) => {
 
-      try {
-
-        await axios.delete(
-          `${API_URL}/${id}`,
-          {
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
-        );
-
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    // FRONT
-    setCart((prev) =>
-      prev.filter(
-        (item) =>
-          item.id_producto !== id
-      )
-    );
-  };
-
-  // =====================================
-  // AUMENTAR
-  // =====================================
-  const increaseQuantity =
-    async (id: number) => {
-
-      const producto =
-        cart.find(
-          (item) =>
-            item.id_producto === id
-        );
-
-      if (!producto) return;
-
-      await addToCart(producto);
-    };
-
-  // =====================================
-  // DISMINUIR
-  // =====================================
-  const decreaseQuantity =
-    async (id: number) => {
-
-      setCart((prev) =>
-        prev
-          .map((item) =>
-            item.id_producto === id
-              ? {
-                  ...item,
-                  cantidad:
-                    item.cantidad - 1,
-                }
-              : item
-          )
-          .filter(
-            (item) =>
-              item.cantidad > 0
-          )
-      );
-    };
-
-  // =====================================
-  // VACIAR
-  // =====================================
-  const clearCart =
-    async () => {
+      // =====================================
+      // BACKEND
+      // =====================================
 
       if (token) {
 
         try {
 
           await axios.delete(
-            API_URL,
+            `${API_URL}/carrito/${id}`,
             {
               headers: {
                 Authorization:
@@ -325,14 +362,146 @@ export function CartProvider({
           );
 
         } catch (error) {
+
           console.error(error);
+
+          toast.error(
+            "Error eliminando producto"
+          );
+
+          return;
+        }
+      }
+
+      // =====================================
+      // FRONT
+      // =====================================
+
+      setCart((prev) =>
+        prev.filter(
+          (item) =>
+            item.id_producto !== id
+        )
+      );
+
+      toast.success(
+        "Producto eliminado"
+      );
+    };
+
+  // =====================================
+  // AUMENTAR CANTIDAD
+  // =====================================
+
+  const increaseQuantity =
+    async (
+      id: number
+    ) => {
+
+      const producto =
+        cart.find(
+          (item) =>
+            item.id_producto === id
+        );
+
+      if (!producto) return;
+
+      await addToCart(
+        producto
+      );
+    };
+
+  // =====================================
+  // DISMINUIR CANTIDAD
+  // =====================================
+
+  const decreaseQuantity =
+    async (
+      id: number
+    ) => {
+
+      const item =
+        cart.find(
+          (item) =>
+            item.id_producto === id
+        );
+
+      if (!item) return;
+
+      // =====================================
+      // SI SOLO HAY 1
+      // =====================================
+
+      if (
+        item.cantidad === 1
+      ) {
+
+        await removeFromCart(id);
+
+        return;
+      }
+
+      // =====================================
+      // FRONT
+      // =====================================
+
+      setCart((prev) =>
+
+        prev.map((item) =>
+
+          item.id_producto === id
+            ? {
+                ...item,
+                cantidad:
+                  item.cantidad - 1,
+              }
+            : item
+        )
+      );
+    };
+
+  // =====================================
+  // VACIAR CARRITO
+  // =====================================
+
+  const clearCart =
+    async () => {
+
+      if (token) {
+
+        try {
+
+          await axios.delete(
+            `${API_URL}/carrito`,
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          );
+
+        } catch (error) {
+
+          console.error(error);
+
+          toast.error(
+            "Error vaciando carrito"
+          );
+
+          return;
         }
       }
 
       setCart([]);
+
+      toast.success(
+        "Carrito vaciado"
+      );
     };
 
   return (
+
     <CartContext.Provider
       value={{
         cart,
@@ -343,16 +512,23 @@ export function CartProvider({
         clearCart,
       }}
     >
+
       {children}
+
     </CartContext.Provider>
   );
 }
 
-// 🪝 HOOK
+// =====================================
+// HOOK
+// =====================================
+
 export function useCart() {
 
   const context =
-    useContext(CartContext);
+    useContext(
+      CartContext
+    );
 
   if (!context) {
 

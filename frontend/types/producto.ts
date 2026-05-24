@@ -6,4 +6,6 @@ export interface Producto {
   stock: number;
   imagen_url: string;
   id_categoria: number;
+  categoria_nombre: string;
+  es_distribuido: boolean;
 }

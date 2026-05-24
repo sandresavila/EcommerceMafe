@@ -4,9 +4,10 @@ import { Router }
 import {
   crearPedido,
   obtenerPedidos,
+  obtenerMisPedidos,
   obtenerDetallePedido,
   actualizarEstadoPedido,
-  dashboardAdmin
+  dashboardAdmin,
 } from "../controllers/pedido.controller.js";
 
 import {
@@ -16,7 +17,6 @@ import {
 import {
   esAdmin,
 } from "../middlewares/role.middleware.js";
-
 
 const router = Router();
 
@@ -28,6 +28,16 @@ router.post(
   "/",
   verificarToken,
   crearPedido
+);
+
+// =====================================
+// MIS PEDIDOS (CLIENTE)
+// =====================================
+
+router.get(
+  "/mis-pedidos",
+  verificarToken,
+  obtenerMisPedidos
 );
 
 // =====================================
@@ -73,4 +83,4 @@ router.get(
   dashboardAdmin
 );
 
-export default router; 
+export default router;

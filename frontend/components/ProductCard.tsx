@@ -1,5 +1,17 @@
 "use client";
 
+import Link from "next/link";
+
+import Image from "next/image";
+
+import {
+  Heart,
+} from "lucide-react";
+
+import {
+  toast,
+} from "sonner";
+
 import {
   Producto,
 } from "@/types/producto";
@@ -8,13 +20,13 @@ import {
   useCart,
 } from "@/context/CartContext";
 
-import Link from "next/link";
+import {
+  useAuth,
+} from "@/context/AuthContext";
 
 import {
-  useState,
-} from "react";
-
-import Image from "next/image";
+  useFavorites,
+} from "@/context/FavoritesContext";
 
 export default function ProductCard({
   producto,
@@ -22,18 +34,41 @@ export default function ProductCard({
   producto: Producto;
 }) {
 
+  // =====================================
+  // CONTEXTOS
+  // =====================================
+
   const {
     addToCart,
   } = useCart();
 
-  const [liked,
-    setLiked] =
-      useState(false);
+  const {
+    usuario,
+  } = useAuth();
+
+  const {
+    addFavorito,
+    removeFavorito,
+    isFavorito,
+  } = useFavorites();
+
+  // =====================================
+  // VALIDACION
+  // =====================================
 
   if (
     !producto ||
     !producto.id_producto
   ) return null;
+
+  // =====================================
+  // FAVORITO
+  // =====================================
+
+  const liked =
+    isFavorito(
+      producto.id_producto
+    );
 
   // =====================================
   // FORMATO PRECIO
@@ -47,6 +82,7 @@ export default function ProductCard({
         {
           style: "currency",
           currency: "COP",
+          maximumFractionDigits: 0,
         }
       );
 
@@ -61,7 +97,60 @@ export default function ProductCard({
     producto.stock > 0 &&
     producto.stock <= 5;
 
+  // =====================================
+  // TOGGLE FAVORITO
+  // =====================================
+
+  const toggleFavorito =
+    async () => {
+
+      try {
+
+        // LOGIN
+        if (!usuario) {
+
+          toast.error(
+            "Debes iniciar sesión"
+          );
+
+          return;
+        }
+
+        // ELIMINAR
+        if (liked) {
+
+          await removeFavorito(
+            producto.id_producto
+          );
+
+          toast.success(
+            "Eliminado de favoritos"
+          );
+
+        } else {
+
+          // AGREGAR
+          await addFavorito(
+            producto
+          );
+
+          toast.success(
+            "Agregado a favoritos"
+          );
+        }
+
+      } catch (error) {
+
+        console.error(error);
+
+        toast.error(
+          "Error actualizando favorito"
+        );
+      }
+    };
+
   return (
+
     <div className="bg-white rounded-3xl shadow-md overflow-hidden group hover:shadow-2xl transition duration-300 border border-gray-100">
 
       {/* IMAGEN */}
@@ -111,15 +200,23 @@ export default function ProductCard({
 
         {/* FAVORITO */}
         <button
-          onClick={() =>
-            setLiked(!liked)
-          }
-          className="absolute top-3 right-3 bg-white/90 backdrop-blur p-2 rounded-full hover:scale-110 transition shadow"
+          onClick={toggleFavorito}
+          className={`absolute top-3 right-3 p-2 rounded-full shadow-lg backdrop-blur transition-all duration-300
+          ${
+            liked
+              ? "bg-red-100 scale-110"
+              : "bg-white/90 hover:scale-110"
+          }`}
         >
 
-          {liked
-            ? "❤️"
-            : "🤍"}
+          <Heart
+            className={`w-5 h-5 transition
+            ${
+              liked
+                ? "fill-red-500 text-red-500"
+                : "text-gray-600"
+            }`}
+          />
 
         </button>
 
@@ -156,11 +253,26 @@ export default function ProductCard({
 
         </p>
 
+        {/* CATEGORIA */}
+        {producto.categoria_nombre && (
+
+          <div className="mt-3">
+
+            <span className="bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full">
+
+              {producto.categoria_nombre}
+
+            </span>
+
+          </div>
+        )}
+
         {/* STOCK */}
         <p className="text-xs text-gray-400 mt-3">
 
           Stock disponible:
           {" "}
+
           <span className="font-semibold">
 
             {producto.stock}
@@ -203,7 +315,7 @@ export default function ProductCard({
 
         </div>
 
-        {/* MENSAJE */}
+        {/* FOOTER */}
         <div className="mt-4 flex items-center justify-between text-xs text-gray-400">
 
           <span>

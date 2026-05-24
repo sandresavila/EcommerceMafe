@@ -1,49 +1,103 @@
 -- =========================================
--- TABLA: USUARIOS (ACTUALIZADA)
+-- ELIMINAR Y CREAR BASE DE DATOS
 -- =========================================
+
+DROP DATABASE IF EXISTS ecommerce_belleza;
+
+CREATE DATABASE ecommerce_belleza;
+
+USE ecommerce_belleza;
+
+-- =========================================
+-- TABLA: USUARIOS
+-- =========================================
+
 CREATE TABLE usuarios (
+
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+
     nombre VARCHAR(100) NOT NULL,
+
     correo VARCHAR(100) UNIQUE NOT NULL,
-    
-    -- 🔥 ahora puede ser NULL (login con Google, etc.)
+
+    -- LOGIN LOCAL / GOOGLE
     password VARCHAR(255) NULL,
-    
+
     telefono VARCHAR(20),
+
     direccion TEXT,
-    
-    -- 🔥 nueva columna para foto de perfil
+
     imagen TEXT,
-    
-    -- 🔥 proveedor de autenticación
+
     provider VARCHAR(50) DEFAULT 'local',
-    
-    rol ENUM('cliente', 'admin') DEFAULT 'cliente',
+
+    rol ENUM(
+        'cliente',
+        'admin'
+    ) DEFAULT 'cliente',
+
+    email_verificado BOOLEAN DEFAULT FALSE,
+
+    reset_token TEXT,
+
+    reset_token_expira DATETIME,
+
+    activo BOOLEAN DEFAULT TRUE,
+
+    ultimo_login TIMESTAMP NULL,
+
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- =========================================
 -- TABLA: CATEGORIAS
 -- =========================================
+
 CREATE TABLE categorias (
+
     id_categoria INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
+
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+
     descripcion TEXT
 );
 
 -- =========================================
 -- TABLA: PRODUCTOS
 -- =========================================
+
 CREATE TABLE productos (
+
     id_producto INT AUTO_INCREMENT PRIMARY KEY,
+
     nombre VARCHAR(150) NOT NULL,
+
+    slug VARCHAR(255) UNIQUE,
+
     descripcion TEXT,
+
+    marca VARCHAR(100),
+
     precio DECIMAL(10,2) NOT NULL,
+
+    precio_anterior DECIMAL(10,2) DEFAULT NULL,
+
     stock INT DEFAULT 0,
-    id_categoria INT,
+
+    stock_minimo INT DEFAULT 5,
+
+    id_categoria INT NULL,
+
     imagen_url TEXT,
+
+    destacado BOOLEAN DEFAULT FALSE,
+
     es_distribuido BOOLEAN DEFAULT FALSE,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ON UPDATE CURRENT_TIMESTAMP,
 
     FOREIGN KEY (id_categoria)
         REFERENCES categorias(id_categoria)
@@ -51,12 +105,20 @@ CREATE TABLE productos (
         ON UPDATE CASCADE
 );
 
+-- FULLTEXT
+ALTER TABLE productos
+ADD FULLTEXT(nombre, descripcion);
+
 -- =========================================
 -- TABLA: CARRITO
 -- =========================================
+
 CREATE TABLE carrito (
+
     id_carrito INT AUTO_INCREMENT PRIMARY KEY,
+
     id_usuario INT,
+
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (id_usuario)
@@ -68,10 +130,15 @@ CREATE TABLE carrito (
 -- =========================================
 -- TABLA: DETALLE CARRITO
 -- =========================================
+
 CREATE TABLE carrito_detalle (
+
     id_detalle INT AUTO_INCREMENT PRIMARY KEY,
+
     id_carrito INT,
+
     id_producto INT,
+
     cantidad INT NOT NULL,
 
     FOREIGN KEY (id_carrito)
@@ -88,12 +155,26 @@ CREATE TABLE carrito_detalle (
 -- =========================================
 -- TABLA: PEDIDOS
 -- =========================================
+
 CREATE TABLE pedidos (
+
     id_pedido INT AUTO_INCREMENT PRIMARY KEY,
-    id_usuario INT,
+
+    id_usuario INT NULL,
+
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    total DECIMAL(10,2),
-    estado ENUM('pendiente', 'pagado', 'enviado', 'entregado', 'cancelado') DEFAULT 'pendiente',
+
+    total DECIMAL(10,2) DEFAULT 0,
+
+    estado ENUM(
+        'pendiente',
+        'pagado',
+        'preparando',
+        'enviado',
+        'entregado',
+        'cancelado'
+    ) DEFAULT 'pendiente',
+
     direccion_envio TEXT,
 
     FOREIGN KEY (id_usuario)
@@ -105,11 +186,17 @@ CREATE TABLE pedidos (
 -- =========================================
 -- TABLA: DETALLE PEDIDO
 -- =========================================
+
 CREATE TABLE pedido_detalle (
+
     id_detalle INT AUTO_INCREMENT PRIMARY KEY,
+
     id_pedido INT,
+
     id_producto INT,
+
     cantidad INT NOT NULL,
+
     precio_unitario DECIMAL(10,2) NOT NULL,
 
     FOREIGN KEY (id_pedido)
@@ -119,32 +206,53 @@ CREATE TABLE pedido_detalle (
 
     FOREIGN KEY (id_producto)
         REFERENCES productos(id_producto)
-        ON DELETE SET NULL
+        ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
 -- =========================================
--- TABLA: PUNTOS DE VENTA
+-- TABLA: FAVORITOS
 -- =========================================
-CREATE TABLE puntos_venta (
-    id_punto INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    direccion TEXT,
-    ciudad VARCHAR(100),
-    telefono VARCHAR(20),
-    latitud DECIMAL(10,8),
-    longitud DECIMAL(11,8)
+
+CREATE TABLE favoritos (
+
+    id_favorito INT AUTO_INCREMENT PRIMARY KEY,
+
+    id_usuario INT,
+
+    id_producto INT,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (id_usuario)
+        REFERENCES usuarios(id_usuario)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    FOREIGN KEY (id_producto)
+        REFERENCES productos(id_producto)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 -- =========================================
 -- TABLA: RESEÑAS
 -- =========================================
+
 CREATE TABLE resenas (
+
     id_resena INT AUTO_INCREMENT PRIMARY KEY,
+
     id_usuario INT,
+
     id_producto INT,
-    calificacion INT CHECK (calificacion BETWEEN 1 AND 5),
+
+    calificacion INT CHECK (
+        calificacion BETWEEN 1 AND 5
+    ),
+
     comentario TEXT,
+
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (id_usuario)
@@ -159,14 +267,210 @@ CREATE TABLE resenas (
 );
 
 -- =========================================
--- DATOS INICIALES
+-- TABLA: PUNTOS DE VENTA
 -- =========================================
-INSERT INTO categorias (nombre, descripcion) VALUES
-('Uñas', 'Productos para uñas'),
-('Depilación', 'Productos para depilación'),
-('Cuidado personal', 'Productos de cuidado personal'),
-('Distribución', 'Productos de terceros');
 
--- 🔥 admin local
-INSERT INTO usuarios (nombre, correo, password, rol, provider) VALUES
-('Administrador', 'admin@belleza.com', '123456', 'admin', 'local');
+CREATE TABLE puntos_venta (
+
+    id_punto INT AUTO_INCREMENT PRIMARY KEY,
+
+    nombre VARCHAR(100) NOT NULL,
+
+    direccion TEXT,
+
+    ciudad VARCHAR(100),
+
+    telefono VARCHAR(20),
+
+    latitud DECIMAL(10,8),
+
+    longitud DECIMAL(11,8)
+);
+
+-- =========================================
+-- DATOS INICIALES CATEGORIAS
+-- =========================================
+
+INSERT INTO categorias (
+    nombre,
+    descripcion
+)
+VALUES
+
+(
+    'Skincare',
+    'Productos para cuidado facial y piel'
+),
+
+(
+    'Maquillaje',
+    'Productos de maquillaje profesional'
+),
+
+(
+    'Cabello',
+    'Productos para cuidado capilar'
+),
+
+(
+    'Perfumería',
+    'Perfumes y fragancias'
+),
+
+(
+    'Cuidado personal',
+    'Productos de cuidado personal'
+);
+
+-- =========================================
+-- DATOS INICIALES PRODUCTOS
+-- =========================================
+
+INSERT INTO productos
+(
+    nombre,
+    descripcion,
+    precio,
+    stock,
+    id_categoria,
+    imagen_url,
+    destacado,
+    slug,
+    stock_minimo
+)
+VALUES
+
+(
+    'Serum Vitamina C',
+    'Serum facial hidratante con vitamina C para iluminar la piel.',
+    85000,
+    25,
+    1,
+    'https://images.unsplash.com/photo-1620916566398-39f1143ab7be',
+    true,
+    'serum-vitamina-c',
+    5
+),
+
+(
+    'Base Líquida Matte',
+    'Base de maquillaje de larga duración acabado matte.',
+    72000,
+    18,
+    2,
+    'https://images.unsplash.com/photo-1596462502278-27bfdc403348',
+    true,
+    'base-liquida-matte',
+    5
+),
+
+(
+    'Shampoo Reparador',
+    'Shampoo profesional para cabello seco y maltratado.',
+    48000,
+    30,
+    3,
+    'https://images.unsplash.com/photo-1526947425960-945c6e72858f',
+    false,
+    'shampoo-reparador',
+    5
+),
+
+(
+    'Perfume Rose Gold',
+    'Fragancia femenina floral con notas dulces.',
+    210000,
+    12,
+    4,
+    'https://images.unsplash.com/photo-1541643600914-78b084683601',
+    true,
+    'perfume-rose-gold',
+    3
+),
+
+(
+    'Crema Corporal Nutritiva',
+    'Crema corporal humectante con aloe vera.',
+    39000,
+    40,
+    5,
+    'https://images.unsplash.com/photo-1612817159949-195b6eb9e31a',
+    false,
+    'crema-corporal-nutritiva',
+    8
+),
+
+(
+    'Paleta de Sombras Nude',
+    'Paleta profesional de tonos nude y brillantes.',
+    95000,
+    16,
+    2,
+    'https://images.unsplash.com/photo-1512496015851-a90fb38ba796',
+    true,
+    'paleta-sombras-nude',
+    5
+),
+
+(
+    'Protector Solar SPF 50',
+    'Protección solar facial para uso diario.',
+    67000,
+    28,
+    1,
+    'https://images.unsplash.com/photo-1556228578-8c89e6adf883',
+    true,
+    'protector-solar-spf50',
+    5
+),
+
+(
+    'Aceite Capilar Premium',
+    'Aceite nutritivo para brillo y reparación del cabello.',
+    58000,
+    20,
+    3,
+    'https://images.unsplash.com/photo-1522338140262-f46f5913618a',
+    false,
+    'aceite-capilar-premium',
+    5
+),
+
+(
+    'Labial Velvet Red',
+    'Labial rojo intenso acabado aterciopelado.',
+    45000,
+    35,
+    2,
+    'https://images.unsplash.com/photo-1586495777744-4413f21062fa',
+    true,
+    'labial-velvet-red',
+    6
+),
+
+(
+    'Perfume Midnight Black',
+    'Perfume elegante con notas amaderadas.',
+    260000,
+    10,
+    4,
+    'https://images.unsplash.com/photo-1594035910387-fea47794261f',
+    true,
+    'perfume-midnight-black',
+    2
+);
+
+-- =========================================
+-- =========================================
+-- NO EJECUTAR ESTO, PRIMERO REGISTRARSE CON LOS SIGUIENTES DATOS
+Correo:
+admin@belleza.com
+
+Password:
+123456
+-- =========================================
+-- =========================================
+
+UPDATE usuarios
+SET rol = 'admin'
+WHERE correo = 'admin@mafebeauty.com';

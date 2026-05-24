@@ -14,6 +14,7 @@ import {
   Package,
   Pencil,
   Trash2,
+  Folder,
 } from "lucide-react";
 
 import {
@@ -28,6 +29,13 @@ import {
   Producto,
 } from "@/types/producto";
 
+interface Categoria {
+
+  id_categoria: number;
+
+  nombre: string;
+}
+
 export default function AdminProductosPage() {
 
   const { token } =
@@ -36,6 +44,10 @@ export default function AdminProductosPage() {
   const [productos,
     setProductos] =
       useState<Producto[]>([]);
+
+  const [categorias,
+    setCategorias] =
+      useState<Categoria[]>([]);
 
   const [loading,
     setLoading] =
@@ -69,6 +81,10 @@ export default function AdminProductosPage() {
     setStock] =
       useState("");
 
+  const [idCategoria,
+    setIdCategoria] =
+      useState("");
+
   const [imagenFile,
     setImagenFile] =
       useState<File | null>(null);
@@ -78,23 +94,36 @@ export default function AdminProductosPage() {
       useState(false);
 
   // =====================================
-  // FETCH PRODUCTOS
+  // FETCH
   // =====================================
 
   useEffect(() => {
 
-    const fetchProductos =
+    const fetchData =
       async () => {
 
         try {
 
-          const response =
-            await axios.get(
+          const [
+            productosRes,
+            categoriasRes,
+          ] = await Promise.all([
+
+            axios.get(
               `${process.env.NEXT_PUBLIC_API_URL}/productos`
-            );
+            ),
+
+            axios.get(
+              `${process.env.NEXT_PUBLIC_API_URL}/categorias`
+            ),
+          ]);
 
           setProductos(
-            response.data
+            productosRes.data
+          );
+
+          setCategorias(
+            categoriasRes.data
           );
 
         } catch (error) {
@@ -102,7 +131,7 @@ export default function AdminProductosPage() {
           console.error(error);
 
           toast.error(
-            "Error cargando productos"
+            "Error cargando datos"
           );
 
         } finally {
@@ -111,7 +140,7 @@ export default function AdminProductosPage() {
         }
       };
 
-    fetchProductos();
+    fetchData();
 
   }, []);
 
@@ -207,6 +236,11 @@ export default function AdminProductosPage() {
           stock
         );
 
+        formData.append(
+          "id_categoria",
+          idCategoria
+        );
+
         if (
           imagenFile
         ) {
@@ -292,6 +326,11 @@ export default function AdminProductosPage() {
         formData.append(
           "stock",
           stock
+        );
+
+        formData.append(
+          "id_categoria",
+          idCategoria
         );
 
         if (
@@ -418,6 +457,10 @@ export default function AdminProductosPage() {
         producto.stock.toString()
       );
 
+      setIdCategoria(
+        producto.id_categoria?.toString() || ""
+      );
+
       setShowModal(true);
     };
 
@@ -437,6 +480,8 @@ export default function AdminProductosPage() {
       setPrecio("");
 
       setStock("");
+
+      setIdCategoria("");
 
       setImagenFile(null);
 
@@ -531,6 +576,18 @@ export default function AdminProductosPage() {
                       {producto.descripcion}
                     </p>
 
+                    {/* CATEGORIA */}
+                    {producto.id_categoria && (
+
+                      <div className="mt-4 inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-semibold">
+
+                        <Folder className="w-4 h-4" />
+
+                        {producto.id_categoria}
+
+                      </div>
+                    )}
+
                   </div>
 
                   {/* STOCK */}
@@ -559,7 +616,11 @@ export default function AdminProductosPage() {
                 <div className="mt-5 text-3xl font-bold text-primary">
 
                   $
-                  {producto.precio}
+                  {Number(
+                    producto.precio
+                  ).toLocaleString(
+                    "es-CO"
+                  )}
 
                 </div>
 
@@ -691,6 +752,37 @@ export default function AdminProductosPage() {
                 }
                 className="w-full border-2 border-gray-200 focus:border-primary outline-none p-4 rounded-2xl"
               />
+
+              {/* CATEGORIAS */}
+              <select
+                value={idCategoria}
+                onChange={(e) =>
+                  setIdCategoria(
+                    e.target.value
+                  )
+                }
+                className="w-full border-2 border-gray-200 focus:border-primary outline-none p-4 rounded-2xl"
+              >
+
+                <option value="">
+                  Selecciona categoría
+                </option>
+
+                {categorias.map(
+                  (categoria) => (
+
+                    <option
+                      key={categoria.id_categoria}
+                      value={categoria.id_categoria}
+                    >
+
+                      {categoria.nombre}
+
+                    </option>
+                  )
+                )}
+
+              </select>
 
               <input
                 type="file"

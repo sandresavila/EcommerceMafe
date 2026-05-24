@@ -25,6 +25,10 @@ import {
   MapPin,
   ShoppingBag,
   Truck,
+  ShieldCheck,
+  Sparkles,
+  ArrowRight,
+  Lock,
 } from "lucide-react";
 
 import {
@@ -76,6 +80,22 @@ export default function CheckoutPage() {
     subtotal + envio;
 
   // =====================================
+  // FORMATO
+  // =====================================
+
+  const formatPrice =
+    (value: number) =>
+
+      value.toLocaleString(
+        "es-CO",
+        {
+          style: "currency",
+          currency: "COP",
+          maximumFractionDigits: 0,
+        }
+      );
+
+  // =====================================
   // FINALIZAR PEDIDO
   // =====================================
 
@@ -118,7 +138,6 @@ export default function CheckoutPage() {
           return;
         }
 
-        // LOADING
         setLoading(true);
 
         // REQUEST
@@ -139,15 +158,12 @@ export default function CheckoutPage() {
           }
         );
 
-        // SUCCESS
         toast.success(
-          "Pedido realizado correctamente"
+          "Pedido realizado correctamente ✨"
         );
 
-        // LIMPIAR CARRITO
         clearCart();
 
-        // REDIRECT
         setTimeout(() => {
 
           router.push(
@@ -161,16 +177,16 @@ export default function CheckoutPage() {
         console.error(error);
 
         let mensaje =
-            "Error creando pedido";
+          "Error creando pedido";
 
         if (
-            axios.isAxiosError(error)
+          axios.isAxiosError(error)
         ) {
 
-            mensaje =
-                error.response?.data?.message ||
-                mensaje;
-            }
+          mensaje =
+            error.response?.data?.message ||
+            mensaje;
+        }
 
         toast.error(mensaje);
 
@@ -181,38 +197,80 @@ export default function CheckoutPage() {
     };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-gray-100 p-6 md:p-10">
+
+    <main className="min-h-screen bg-[#F8F9FC] overflow-hidden px-4 md:px-8 py-14">
 
       <div className="max-w-7xl mx-auto">
 
-        {/* HEADER */}
-        <div className="mb-10">
+        {/* ===================================== */}
+        {/* HERO */}
+        {/* ===================================== */}
 
-          <h1 className="text-5xl font-extrabold text-gray-800 mb-3">
-            Checkout
+        <section className="text-center mb-14 fade-in">
+
+          <div className="inline-flex items-center gap-3 bg-primary/10 text-primary px-6 py-3 rounded-full font-semibold mb-6">
+
+            <Sparkles className="w-5 h-5" />
+
+            Compra segura
+
+          </div>
+
+          <h1 className="text-5xl md:text-6xl font-black text-dark">
+
+            Finalizar compra
+
           </h1>
 
-          <p className="text-gray-500 text-lg">
-            Finaliza tu compra de forma segura ✨
+          <p className="text-gray-500 text-lg mt-5 max-w-2xl mx-auto">
+
+            Revisa tu pedido y completa la información
+            para recibir tus productos rápidamente.
+
           </p>
 
-        </div>
+        </section>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        {/* ===================================== */}
+        {/* LAYOUT */}
+        {/* ===================================== */}
 
-          {/* IZQUIERDA */}
-          <div className="lg:col-span-2 space-y-8">
+        <div className="grid xl:grid-cols-3 gap-8">
+
+          {/* ===================================== */}
+          {/* LEFT */}
+          {/* ===================================== */}
+
+          <div className="xl:col-span-2 space-y-8">
 
             {/* PRODUCTOS */}
-            <div className="bg-white rounded-[2rem] shadow-xl p-8">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl p-6 md:p-10">
 
-              <div className="flex items-center gap-3 mb-8">
+              <div className="flex items-center gap-4 mb-10">
 
-                <ShoppingBag className="w-7 h-7 text-primary" />
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
 
-                <h2 className="text-3xl font-bold">
-                  Tus productos
-                </h2>
+                  <ShoppingBag className="w-8 h-8" />
+
+                </div>
+
+                <div>
+
+                  <h2 className="text-3xl font-black text-dark">
+
+                    Tus productos
+
+                  </h2>
+
+                  <p className="text-gray-500 mt-2">
+
+                    {cart.length}
+                    {" "}
+                    productos en el carrito
+
+                  </p>
+
+                </div>
 
               </div>
 
@@ -222,51 +280,76 @@ export default function CheckoutPage() {
 
                   <div
                     key={item.id_producto}
-                    className="flex gap-5 items-center border-b border-gray-100 pb-6"
+                    className="flex flex-col md:flex-row gap-5 md:items-center bg-gray-50 rounded-[2rem] p-5"
                   >
 
-                    {/* IMAGEN */}
-                    {item.imagen_url && (
+                    {/* IMAGE */}
+                    <div className="relative w-full md:w-32 h-60 md:h-32 overflow-hidden rounded-3xl">
 
                       <Image
-                        src={item.imagen_url}
-                        alt={item.nombre}
-                        width={120}
-                        height={120}
-                        className="w-28 h-28 object-cover rounded-3xl shadow"
+                        src={
+                          item.imagen_url ||
+                          "/placeholder.png"
+                        }
+                        alt={
+                          item.nombre
+                        }
+                        fill
+                        className="object-cover"
                       />
-                    )}
+
+                    </div>
 
                     {/* INFO */}
                     <div className="flex-1">
 
-                      <h3 className="font-bold text-xl text-gray-800">
+                      <h3 className="text-2xl font-black text-dark">
+
                         {item.nombre}
+
                       </h3>
 
-                      <p className="text-gray-500 mt-2">
-                        Cantidad:
-                        {" "}
-                        {item.cantidad}
-                      </p>
+                      <div className="flex flex-wrap gap-4 mt-4 text-gray-500">
 
-                      <p className="text-primary font-bold text-lg mt-2">
-                        $
-                        {item.precio}
-                      </p>
+                        <span>
+
+                          Cantidad:
+                          {" "}
+                          {item.cantidad}
+
+                        </span>
+
+                        <span>
+
+                          Precio:
+                          {" "}
+                          {formatPrice(
+                            item.precio
+                          )}
+
+                        </span>
+
+                      </div>
 
                     </div>
 
                     {/* TOTAL */}
-                    <div className="text-right">
+                    <div className="md:text-right">
 
-                      <p className="font-bold text-2xl text-gray-800">
+                      <p className="text-gray-400 text-sm uppercase tracking-wide">
 
-                        $
-                        {item.precio *
-                          item.cantidad}
+                        Total
 
                       </p>
+
+                      <h4 className="text-3xl font-black text-primary mt-2">
+
+                        {formatPrice(
+                          item.precio *
+                          item.cantidad
+                        )}
+
+                      </h4>
 
                     </div>
 
@@ -278,15 +361,31 @@ export default function CheckoutPage() {
             </div>
 
             {/* DIRECCION */}
-            <div className="bg-white rounded-[2rem] shadow-xl p-8">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl p-6 md:p-10">
 
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-4 mb-8">
 
-                <MapPin className="w-7 h-7 text-primary" />
+                <div className="w-16 h-16 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center">
 
-                <h2 className="text-3xl font-bold">
-                  Dirección de envío
-                </h2>
+                  <MapPin className="w-8 h-8" />
+
+                </div>
+
+                <div>
+
+                  <h2 className="text-3xl font-black text-dark">
+
+                    Dirección de envío
+
+                  </h2>
+
+                  <p className="text-gray-500 mt-2">
+
+                    Ingresa la dirección completa donde deseas recibir tu pedido
+
+                  </p>
+
+                </div>
 
               </div>
 
@@ -297,59 +396,93 @@ export default function CheckoutPage() {
                     e.target.value
                   )
                 }
-                placeholder="Ingresa la dirección completa..."
-                className="w-full border-2 border-gray-200 focus:border-primary outline-none transition p-5 rounded-3xl h-40 resize-none text-lg"
+                placeholder="Ej: Calle 20 #10-35, apartamento 302, Soacha..."
+                className="w-full border-2 border-gray-200 bg-gray-50 focus:bg-white focus:border-primary outline-none transition p-6 rounded-[2rem] h-44 resize-none text-lg"
               />
 
             </div>
 
           </div>
 
-          {/* DERECHA */}
-          <div className="space-y-8">
+          {/* ===================================== */}
+          {/* RIGHT */}
+          {/* ===================================== */}
 
-            {/* RESUMEN */}
-            <div className="bg-white rounded-[2rem] shadow-xl p-8 sticky top-8">
+          <div>
 
-              <div className="flex items-center gap-3 mb-8">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl p-8 sticky top-8 overflow-hidden">
 
-                <CreditCard className="w-7 h-7 text-primary" />
+              {/* BG */}
+              <div className="absolute top-0 right-0 w-44 h-44 bg-primary/5 rounded-full blur-3xl" />
 
-                <h2 className="text-3xl font-bold">
-                  Resumen
-                </h2>
+              {/* HEADER */}
+              <div className="relative flex items-center gap-4 mb-10">
+
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+
+                  <CreditCard className="w-8 h-8" />
+
+                </div>
+
+                <div>
+
+                  <h2 className="text-3xl font-black text-dark">
+
+                    Resumen
+
+                  </h2>
+
+                  <p className="text-gray-500 mt-2">
+
+                    Detalles de tu compra
+
+                  </p>
+
+                </div>
 
               </div>
 
-              {/* INFO */}
-              <div className="space-y-5">
+              {/* DETALLE */}
+              <div className="relative space-y-6">
 
-                <div className="flex justify-between text-lg">
+                {/* PRODUCTOS */}
+                <div className="flex justify-between items-center">
 
                   <span className="text-gray-500">
+
                     Productos
+
                   </span>
 
-                  <span className="font-semibold">
+                  <span className="font-bold text-dark text-lg">
+
                     {cart.length}
+
                   </span>
 
                 </div>
 
-                <div className="flex justify-between text-lg">
+                {/* SUBTOTAL */}
+                <div className="flex justify-between items-center">
 
                   <span className="text-gray-500">
+
                     Subtotal
+
                   </span>
 
-                  <span className="font-semibold">
-                    $
-                    {subtotal}
+                  <span className="font-bold text-dark text-lg">
+
+                    {formatPrice(
+                      subtotal
+                    )}
+
                   </span>
 
                 </div>
 
-                <div className="flex justify-between text-lg">
+                {/* ENVIO */}
+                <div className="flex justify-between items-center">
 
                   <span className="text-gray-500 flex items-center gap-2">
 
@@ -359,25 +492,47 @@ export default function CheckoutPage() {
 
                   </span>
 
-                  <span className="font-semibold">
+                  <span className="font-bold text-dark text-lg">
 
                     {envio === 0
                       ? "Gratis"
-                      : `$${envio}`}
+                      : formatPrice(
+                          envio
+                        )}
 
                   </span>
 
                 </div>
 
-                <div className="border-t pt-6 flex justify-between items-center">
+                {/* BENEFICIO */}
+                {envio === 0 && (
 
-                  <span className="text-2xl font-bold">
+                  <div className="bg-green-50 border border-green-100 rounded-2xl p-4">
+
+                    <p className="text-green-700 font-semibold text-sm">
+
+                      🎉 Tu pedido aplica para envío gratis
+
+                    </p>
+
+                  </div>
+                )}
+
+                {/* TOTAL */}
+                <div className="border-t border-gray-100 pt-6 flex justify-between items-center">
+
+                  <span className="text-2xl font-black text-dark">
+
                     Total
+
                   </span>
 
-                  <span className="text-3xl font-extrabold text-primary">
-                    $
-                    {total}
+                  <span className="text-4xl font-black text-primary">
+
+                    {formatPrice(
+                      total
+                    )}
+
                   </span>
 
                 </div>
@@ -392,26 +547,81 @@ export default function CheckoutPage() {
                 disabled={
                   loading
                 }
-                className={`w-full mt-10 py-5 rounded-3xl text-xl font-bold shadow-xl transition
+                className={`relative w-full mt-10 h-16 rounded-3xl text-xl font-black shadow-2xl transition flex items-center justify-center gap-3
                 ${
                   loading
                     ? "bg-gray-400 text-white cursor-not-allowed"
-                    : "bg-primary hover:opacity-90 text-white"
+                    : "bg-primary hover:scale-[1.02] text-white"
                 }`}
               >
 
-                {loading
-                  ? "Procesando..."
-                  : "Finalizar compra"}
+                {loading ? (
+
+                  "Procesando..."
+
+                ) : (
+
+                  <>
+                    Finalizar compra
+
+                    <ArrowRight className="w-6 h-6" />
+                  </>
+                )}
 
               </button>
 
-              {/* INFO */}
-              <p className="text-gray-400 text-sm text-center mt-5 leading-relaxed">
+              {/* SECURITY */}
+              <div className="mt-8 bg-gray-50 rounded-2xl p-5">
 
-                Al finalizar tu compra aceptas nuestros términos y condiciones.
+                <div className="flex items-start gap-4">
 
-              </p>
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+
+                    <Lock className="w-5 h-5" />
+
+                  </div>
+
+                  <div>
+
+                    <h3 className="font-bold text-dark">
+
+                      Compra segura
+
+                    </h3>
+
+                    <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+
+                      Tus datos están protegidos y tu pedido
+                      será procesado de forma segura.
+
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* GARANTIAS */}
+              <div className="mt-6 space-y-4">
+
+                <div className="flex items-center gap-3 text-gray-600">
+
+                  <ShieldCheck className="w-5 h-5 text-green-500" />
+
+                  Productos 100% originales
+
+                </div>
+
+                <div className="flex items-center gap-3 text-gray-600">
+
+                  <Truck className="w-5 h-5 text-primary" />
+
+                  Envíos a todo Colombia
+
+                </div>
+
+              </div>
 
             </div>
 
@@ -421,6 +631,6 @@ export default function CheckoutPage() {
 
       </div>
 
-    </div>
+    </main>
   );
 }

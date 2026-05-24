@@ -1,23 +1,138 @@
 import { Router } from "express";
 
 import {
+
   obtenerUsuarios,
   obtenerUsuario,
   crearUsuario,
   actualizarUsuario,
   eliminarUsuario,
+
+  obtenerPerfil,
+  actualizarPerfil,
+
+  cambiarRolUsuario,
+  bloquearUsuario,
+  activarUsuario,
+
 } from "../controllers/usuario.controller.js";
+
+import {
+
+  verificarToken,
+
+} from "../middlewares/auth.middleware.js";
+
+import {
+
+  esAdmin,
+
+} from "../middlewares/role.middleware.js";
 
 const router = Router();
 
-router.get("/", obtenerUsuarios);
+// =====================================
+// PERFIL USUARIO LOGUEADO
+// =====================================
 
-router.get("/:id", obtenerUsuario);
+router.get(
+  "/perfil",
+  verificarToken,
+  obtenerPerfil
+);
 
-router.post("/", crearUsuario);
+router.put(
+  "/perfil",
+  verificarToken,
+  actualizarPerfil
+);
 
-router.put("/:id", actualizarUsuario);
+// =====================================
+// ADMIN - OBTENER TODOS
+// =====================================
 
-router.delete("/:id", eliminarUsuario);
+router.get(
+  "/",
+  verificarToken,
+  esAdmin,
+  obtenerUsuarios
+);
+
+// =====================================
+// ADMIN - OBTENER UNO
+// =====================================
+
+router.get(
+  "/:id",
+  verificarToken,
+  esAdmin,
+  obtenerUsuario
+);
+
+// =====================================
+// ADMIN - CREAR
+// =====================================
+
+router.post(
+  "/",
+  verificarToken,
+  esAdmin,
+  crearUsuario
+);
+
+// =====================================
+// ADMIN - ACTUALIZAR
+// =====================================
+
+router.put(
+  "/:id",
+  verificarToken,
+  esAdmin,
+  actualizarUsuario
+);
+
+// =====================================
+// ADMIN - CAMBIAR ROL
+// =====================================
+
+router.put(
+  "/:id/rol",
+  verificarToken,
+  esAdmin,
+  cambiarRolUsuario
+);
+
+// =====================================
+// ADMIN - BLOQUEAR
+// =====================================
+
+router.put(
+  "/:id/bloquear",
+  verificarToken,
+  esAdmin,
+  bloquearUsuario
+);
+
+// =====================================
+// ADMIN - ACTIVAR
+// =====================================
+
+router.put(
+  "/:id/activar",
+  verificarToken,
+  esAdmin,
+  activarUsuario
+);
+
+// =====================================
+// ADMIN - ELIMINAR
+// =====================================
+
+router.delete(
+  "/:id",
+  verificarToken,
+  esAdmin,
+  eliminarUsuario
+);
 
 export default router;

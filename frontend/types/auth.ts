@@ -1,8 +1,13 @@
 export interface Usuario {
-  id: number;
+  id_usuario: number;
   nombre: string;
   correo: string;
   rol: string;
+  telefono?: string;
+  direccion?: string;
+  activo?: boolean;
+  ultimo_login?: string;
+  fecha_registro?: string;
 }
 
 export interface AuthResponse {

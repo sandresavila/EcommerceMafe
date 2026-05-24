@@ -1,4 +1,6 @@
-import type { Metadata } from "next";
+import type {
+  Metadata,
+} from "next";
 
 import {
   Poppins,
@@ -6,11 +8,23 @@ import {
 
 import "./globals.css";
 
+// =====================================
 // COMPONENTES
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+// =====================================
 
+import Navbar
+  from "@/components/Navbar";
+
+import Footer
+  from "@/components/Footer";
+
+import WhatsAppFloat
+  from "@/components/WhatsAppFloat";
+
+// =====================================
 // CONTEXTOS
+// =====================================
+
 import {
   CartProvider,
 } from "@/context/CartContext";
@@ -19,7 +33,14 @@ import {
   AuthProvider,
 } from "@/context/AuthContext";
 
+import {
+  FavoritesProvider,
+} from "@/context/FavoritesContext";
+
+// =====================================
 // SONNER
+// =====================================
+
 import {
   Toaster,
 } from "sonner";
@@ -37,6 +58,8 @@ const poppins =
       "500",
       "600",
       "700",
+      "800",
+      "900",
     ],
     variable:
       "--font-body",
@@ -63,6 +86,10 @@ export const metadata:
     "tienda online",
     "Colombia",
   ],
+
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 // =====================================
@@ -80,37 +107,54 @@ export default function RootLayout({
 
     <html
       lang="es"
-      className={`${poppins.variable} h-full antialiased`}
+      className={`${poppins.variable} h-full scroll-smooth`}
+      data-scroll-behavior="smooth"
     >
 
-      <body className="min-h-full flex flex-col bg-white text-dark font-body">
+      <body className="min-h-full flex flex-col bg-white text-dark font-body overflow-x-hidden">
 
         {/* AUTH */}
         <AuthProvider>
 
-          {/* CART */}
-          <CartProvider>
+          {/* FAVORITOS */}
+          <FavoritesProvider>
 
-            {/* TOASTER */}
-            <Toaster
-              richColors
-              position="top-right"
-              closeButton
-              expand 
-            />
+            {/* CART */}
+            <CartProvider>
 
-            {/* NAVBAR */}
-            <Navbar />
+              {/* TOASTER */}
+              <Toaster
+                richColors
+                position="top-right"
+                closeButton
+                expand
+                toastOptions={{
+                  classNames: {
+                    toast:
+                      "rounded-2xl shadow-xl border border-gray-100",
+                  },
+                }}
+              />
 
-            {/* CONTENIDO */}
-            <main className="flex-1">
-              {children}
-            </main>
+              {/* NAVBAR */}
+              <Navbar />
 
-            {/* FOOTER */}
-            <Footer />
+              {/* CONTENIDO */}
+              <main className="flex-1">
 
-          </CartProvider>
+                {children}
+
+              </main>
+
+              {/* WHATSAPP FLOAT */}
+              <WhatsAppFloat />
+
+              {/* FOOTER */}
+              <Footer />
+
+            </CartProvider>
+
+          </FavoritesProvider>
 
         </AuthProvider>
 
