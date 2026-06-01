@@ -1,36 +1,163 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💄 MAFE Beauty E-commerce
 
-## Getting Started
+Plataforma de comercio electrónico desarrollada para la empresa MAFE Beauty, enfocada en la venta de productos de belleza, maquillaje, skincare y cuidado personal, ofreciendo una experiencia de compra moderna, intuitiva y acompañamiento personalizado para los clientes.
 
-First, run the development server:
+## 🚀 Objetivo del Proyecto
+
+Desarrollar una plataforma web de comercio electrónico que permita:
+
+* Gestionar productos y categorías.
+* Administrar pedidos y usuarios.
+* Facilitar el proceso de compra online.
+* Brindar asesoría personalizada mediante canales digitales.
+* Mejorar la presencia digital y el posicionamiento de la marca MAFE Beauty.
+
+---
+
+## 🛠 Tecnologías Utilizadas
+
+### Frontend
+
+* Next.js 16
+* React
+* TypeScript
+* Tailwind CSS
+* Context API
+* Axios
+
+### Backend
+
+* Node.js
+* Express.js
+* JWT Authentication
+* Multer
+* Nodemailer
+
+### Base de Datos
+
+* MySQL
+
+### Despliegue
+
+* Frontend: Vercel
+* Backend: Render
+* Base de Datos: Railway
+
+---
+
+## 📋 Funcionalidades
+
+### Clientes
+
+* Registro e inicio de sesión.
+* Visualización de productos.
+* Búsqueda y filtrado.
+* Gestión de favoritos.
+* Carrito de compras.
+* Gestión de pedidos.
+* Perfil de usuario.
+
+### Administrador
+
+* Gestión de productos.
+* Gestión de categorías.
+* Gestión de usuarios.
+* Gestión de pedidos.
+* Panel administrativo.
+
+---
+
+## 🎨 Identidad Visual
+
+### Logo
+
+MAFE Beauty
+
+### Eslogan
+
+**"Belleza, skincare y asesoría personalizada."**
+
+### Tipografía
+
+* Poppins
+
+### Paleta de Colores
+
+| Color           | Código  |
+| --------------- | ------- |
+| Rosa Principal  | #E91E63 |
+| Azul Secundario | #1E88E5 |
+| Blanco          | #FFFFFF |
+| Gris Claro      | #F5F5F5 |
+| Gris Oscuro     | #333333 |
+
+---
+
+## 🏗 Arquitectura del Sistema
+
+Frontend (Next.js)
+
+⬇
+
+API REST (Express.js)
+
+⬇
+
+MySQL (Railway)
+
+---
+
+## 🌐 Despliegue
+
+Frontend:
+
+https://ecommerce-mafe.vercel.app
+
+Backend:
+
+https://ecommercemafe.onrender.com
+
+---
+
+## 📦 Instalación Local
+
+### Clonar repositorio
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone [URL_DEL_REPOSITORIO](https://github.com/sandresavila/EcommerceMafe.git)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Frontend
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Backend
 
-## Learn More
+```bash
+cd backend
+npm install
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Variables de entorno
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Configurar las variables necesarias para:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+* Base de datos MySQL.
+* JWT.
+* Correo electrónico.
+* URLs de producción.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 👨‍💻 Autor
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Santiago Ávila**
+
+Proyecto académico desarrollado para la asignatura de Comercio Electrónico y Desarrollo de Contenidos Digitales.
+
+Universidad de Cundinamarca.
