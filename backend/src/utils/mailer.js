@@ -28,15 +28,15 @@ transporter.verify(
 
     if (error) {
 
-      console.log(
-        "❌ Error mailer:",
+      console.error(
+        "Error verificando mailer:",
         error
       );
 
     } else {
 
       console.log(
-        "✅ Mailer listo"
+        "Mailer listo"
       );
     }
   }

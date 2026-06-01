@@ -216,7 +216,7 @@ export default function CheckoutPage() {
 
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-black text-dark">
+          <h1 className="text-4xl md:text-6xl font-black text-dark">
 
             Finalizar compra
 
@@ -397,7 +397,7 @@ export default function CheckoutPage() {
                   )
                 }
                 placeholder="Ej: Calle 20 #10-35, apartamento 302, Soacha..."
-                className="w-full border-2 border-gray-200 bg-gray-50 focus:bg-white focus:border-primary outline-none transition p-6 rounded-[2rem] h-44 resize-none text-lg"
+                className="w-full border-2 border-gray-200 bg-gray-50 focus:bg-white focus:border-primary outline-none transition p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] h-40 md:h-44 resize-none text-base md:text-lg"
               />
 
             </div>
@@ -410,7 +410,7 @@ export default function CheckoutPage() {
 
           <div>
 
-            <div className="bg-white rounded-[2.5rem] shadow-2xl p-8 sticky top-8 overflow-hidden">
+            <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl p-6 md:p-8 lg:sticky lg:top-8 overflow-hidden">
 
               {/* BG */}
               <div className="absolute top-0 right-0 w-44 h-44 bg-primary/5 rounded-full blur-3xl" />

@@ -72,12 +72,6 @@ export default function ContactoPage() {
 
         setLoading(true);
 
-        // =====================================
-        // BACKEND FUTURO
-        // =====================================
-
-        console.log(form);
-
         await new Promise(
           (resolve) =>
             setTimeout(
@@ -121,7 +115,7 @@ export default function ContactoPage() {
       {/* HERO */}
       {/* ===================================== */}
 
-      <section className="relative px-6 md:px-10 pt-24 pb-20">
+      <section className="relative px-4 sm:px-6 md:px-10 pt-20 md:pt-24 pb-16 md:pb-20">
 
         {/* BG */}
         <div className="absolute inset-0 bg-brand-gradient opacity-[0.05]" />
@@ -136,7 +130,7 @@ export default function ContactoPage() {
 
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-black text-dark leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-dark leading-tight">
 
               Contáctanos
 
@@ -159,7 +153,7 @@ export default function ContactoPage() {
       {/* CONTENT */}
       {/* ===================================== */}
 
-      <section className="px-6 md:px-10 pb-24">
+      <section className="px-4 sm:px-6 md:px-10 pb-20 md:pb-24">
 
         <div className="max-w-7xl mx-auto">
 
@@ -169,7 +163,7 @@ export default function ContactoPage() {
             {/* FORM */}
             {/* ===================================== */}
 
-            <div className="card-modern p-8 md:p-10 fade-in">
+            <div className="card-modern p-5 sm:p-8 md:p-10 fade-in">
 
               <div className="flex items-center gap-4 mb-8">
 
@@ -294,7 +288,7 @@ export default function ContactoPage() {
             <div className="space-y-6 slide-right">
 
               {/* CONTACTO */}
-              <div className="card-modern p-8">
+              <div className="card-modern p-5 sm:p-8">
 
                 <h2 className="text-3xl font-black text-dark mb-8">
 
@@ -390,7 +384,7 @@ export default function ContactoPage() {
               </div>
 
               {/* HORARIOS */}
-              <div className="relative overflow-hidden rounded-[2rem] bg-brand-gradient p-8 text-white shadow-2xl">
+              <div className="relative overflow-hidden rounded-[2rem] bg-brand-gradient p-5 sm:p-8 text-white shadow-2xl">
 
                 {/* DECOR */}
                 <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl" />

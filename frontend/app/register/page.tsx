@@ -198,7 +198,7 @@ export default function RegisterPage() {
           </div>
 
           {/* TITLE */}
-          <h1 className="text-6xl font-black leading-tight">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight">
 
             Crea tu cuenta y vive una experiencia beauty premium ✨
 
@@ -284,7 +284,7 @@ export default function RegisterPage() {
           <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden">
 
             {/* TOP */}
-            <div className="px-8 md:px-10 pt-10">
+            <div className="px-5 sm:px-8 md:px-10 pt-8 md:pt-10">
 
               <h2 className="text-5xl font-black text-dark">
 
@@ -301,7 +301,7 @@ export default function RegisterPage() {
             </div>
 
             {/* FORM */}
-            <div className="p-8 md:p-10">
+            <div className="p-5 sm:p-8 md:p-10">
 
               <div className="grid md:grid-cols-2 gap-5">
 

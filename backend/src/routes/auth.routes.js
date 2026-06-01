@@ -1,4 +1,3 @@
-console.log("AUTH ROUTES CARGADAS");
 import { Router } from "express";
 
 import {

@@ -58,7 +58,7 @@ export default function CarritoPage() {
 
   return (
 
-    <main className="min-h-screen bg-[#F8F9FC] px-4 md:px-8 py-12">
+    <main className="min-h-screen bg-[#F8F9FC] px-4 md:px-8 py-10 md:py-12">
 
       <div className="max-w-7xl mx-auto">
 
@@ -76,7 +76,7 @@ export default function CarritoPage() {
 
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-black text-dark">
+          <h1 className="text-4xl md:text-6xl font-black text-dark">
 
             Carrito 🛒
 
@@ -97,7 +97,7 @@ export default function CarritoPage() {
 
         {cart.length === 0 ? (
 
-          <div className="bg-white rounded-[2.5rem] shadow-xl p-12 md:p-20 text-center zoom-in">
+          <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-xl p-8 md:p-20 text-center zoom-in">
 
             <div className="w-28 h-28 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8">
 
@@ -105,7 +105,7 @@ export default function CarritoPage() {
 
             </div>
 
-            <h2 className="text-4xl font-black text-dark mb-5">
+            <h2 className="text-3xl md:text-4xl font-black text-dark mb-5">
 
               Tu carrito está vacío
 
@@ -278,9 +278,9 @@ export default function CarritoPage() {
             {/* RESUMEN */}
             {/* ===================================== */}
 
-            <aside className="sticky top-8 h-fit">
+            <aside className="lg:sticky lg:top-8 h-fit">
 
-              <div className="bg-white rounded-[2.5rem] shadow-2xl p-8">
+              <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl p-6 md:p-8">
 
                 {/* HEADER */}
                 <h2 className="text-3xl font-black text-dark mb-8">

@@ -9,13 +9,15 @@ import {
 import axios from "axios";
 
 import {
-  Search,
-  Trash2,
+  Download,
   Lock,
-  Unlock,
+  Search,
   ShieldCheck,
-  Users,
+  Trash2,
+  Unlock,
   UserCheck,
+  UserX,
+  Users,
 } from "lucide-react";
 
 import {
@@ -30,10 +32,25 @@ import {
   Usuario,
 } from "@/types/auth";
 
+const formatDate =
+  (value?: string) =>
+    value
+      ? new Date(value).toLocaleDateString(
+          "es-CO",
+          {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }
+        )
+      : "-";
+
 export default function AdminUsuariosPage() {
 
-  const { token } =
-    useAuth();
+  const {
+    token,
+    usuario: usuarioActual,
+  } = useAuth();
 
   const [usuarios,
     setUsuarios] =
@@ -51,9 +68,9 @@ export default function AdminUsuariosPage() {
     setFiltroRol] =
       useState("todos");
 
-  // =====================================
-  // FETCH USUARIOS
-  // =====================================
+  const [filtroEstado,
+    setFiltroEstado] =
+      useState("todos");
 
   useEffect(() => {
 
@@ -98,10 +115,6 @@ export default function AdminUsuariosPage() {
 
   }, [token]);
 
-  // =====================================
-  // FILTROS
-  // =====================================
-
   const usuariosFiltrados =
     useMemo(() => {
 
@@ -112,25 +125,32 @@ export default function AdminUsuariosPage() {
             busqueda.toLowerCase();
 
           const matchBusqueda =
-
             usuario.nombre
               .toLowerCase()
               .includes(texto) ||
-
             usuario.correo
+              .toLowerCase()
+              .includes(texto) ||
+            (usuario.telefono || "")
               .toLowerCase()
               .includes(texto);
 
           const matchRol =
-
             filtroRol === "todos"
               ? true
-              : usuario.rol ===
-                filtroRol;
+              : usuario.rol === filtroRol;
+
+          const matchEstado =
+            filtroEstado === "todos"
+              ? true
+              : filtroEstado === "activos"
+              ? !!usuario.activo
+              : !usuario.activo;
 
           return (
             matchBusqueda &&
-            matchRol
+            matchRol &&
+            matchEstado
           );
         }
       );
@@ -139,17 +159,42 @@ export default function AdminUsuariosPage() {
       usuarios,
       busqueda,
       filtroRol,
+      filtroEstado,
     ]);
 
-  // =====================================
-  // CAMBIAR ROL
-  // =====================================
+  const totalAdmins =
+    usuarios.filter(
+      (u) =>
+        u.rol === "admin"
+    ).length;
+
+  const totalActivos =
+    usuarios.filter(
+      (u) =>
+        u.activo
+    ).length;
+
+  const totalBloqueados =
+    usuarios.length -
+    totalActivos;
 
   const cambiarRol =
     async (
       id_usuario: number,
       rol: string
     ) => {
+
+      if (
+        usuarioActual?.id_usuario ===
+        id_usuario
+      ) {
+
+        toast.warning(
+          "No puedes cambiar tu propio rol"
+        );
+
+        return;
+      }
 
       try {
 
@@ -165,17 +210,12 @@ export default function AdminUsuariosPage() {
         );
 
         setUsuarios((prev) =>
-
           prev.map((usuario) =>
-
-            usuario.id_usuario ===
-            id_usuario
-
+            usuario.id_usuario === id_usuario
               ? {
                   ...usuario,
                   rol,
                 }
-
               : usuario
           )
         );
@@ -194,25 +234,32 @@ export default function AdminUsuariosPage() {
       }
     };
 
-  // =====================================
-  // BLOQUEAR / ACTIVAR
-  // =====================================
-
   const toggleUsuario =
     async (
-      id_usuario: number,
-      activo: boolean
+      usuario: Usuario
     ) => {
+
+      if (
+        usuarioActual?.id_usuario ===
+        usuario.id_usuario
+      ) {
+
+        toast.warning(
+          "No puedes bloquear tu propio usuario"
+        );
+
+        return;
+      }
 
       try {
 
         const endpoint =
-          activo
+          usuario.activo
             ? "bloquear"
             : "activar";
 
         await axios.put(
-          `${process.env.NEXT_PUBLIC_API_URL}/usuarios/${id_usuario}/${endpoint}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/usuarios/${usuario.id_usuario}/${endpoint}`,
           {},
           {
             headers: {
@@ -223,25 +270,19 @@ export default function AdminUsuariosPage() {
         );
 
         setUsuarios((prev) =>
-
-          prev.map((usuario) =>
-
-            usuario.id_usuario ===
-            id_usuario
-
+          prev.map((item) =>
+            item.id_usuario === usuario.id_usuario
               ? {
-                  ...usuario,
+                  ...item,
                   activo:
-                    !activo,
+                    !usuario.activo,
                 }
-
-              : usuario
+              : item
           )
         );
 
         toast.success(
-
-          activo
+          usuario.activo
             ? "Usuario bloqueado"
             : "Usuario activado"
         );
@@ -256,18 +297,26 @@ export default function AdminUsuariosPage() {
       }
     };
 
-  // =====================================
-  // ELIMINAR
-  // =====================================
-
   const eliminarUsuario =
     async (
-      id_usuario: number
+      usuario: Usuario
     ) => {
+
+      if (
+        usuarioActual?.id_usuario ===
+        usuario.id_usuario
+      ) {
+
+        toast.warning(
+          "No puedes eliminar tu propio usuario"
+        );
+
+        return;
+      }
 
       const confirmar =
         confirm(
-          "¿Eliminar usuario?"
+          `¿Eliminar a ${usuario.nombre}? Esta acción no se puede deshacer.`
         );
 
       if (!confirmar) return;
@@ -275,7 +324,7 @@ export default function AdminUsuariosPage() {
       try {
 
         await axios.delete(
-          `${process.env.NEXT_PUBLIC_API_URL}/usuarios/${id_usuario}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/usuarios/${usuario.id_usuario}`,
           {
             headers: {
               Authorization:
@@ -285,12 +334,10 @@ export default function AdminUsuariosPage() {
         );
 
         setUsuarios((prev) =>
-
           prev.filter(
-            (usuario) =>
-
-              usuario.id_usuario !==
-              id_usuario
+            (item) =>
+              item.id_usuario !==
+              usuario.id_usuario
           )
         );
 
@@ -308,403 +355,365 @@ export default function AdminUsuariosPage() {
       }
     };
 
-  // =====================================
-  // STATS
-  // =====================================
+  const exportarCSV =
+    () => {
 
-  const totalAdmins =
+      const headers = [
+        "ID",
+        "Nombre",
+        "Correo",
+        "Telefono",
+        "Rol",
+        "Estado",
+        "Registro",
+      ];
 
-    usuarios.filter(
-      (u) =>
-        u.rol === "admin"
-    ).length;
+      const rows =
+        usuariosFiltrados.map(
+          (usuario) => [
+            usuario.id_usuario,
+            usuario.nombre,
+            usuario.correo,
+            usuario.telefono || "",
+            usuario.rol,
+            usuario.activo
+              ? "Activo"
+              : "Bloqueado",
+            formatDate(
+              usuario.fecha_registro
+            ),
+          ]
+        );
 
-  const totalActivos =
+      const csvContent =
+        [headers, ...rows]
+          .map((row) =>
+            row.map((value) =>
+              `"${String(value).replaceAll('"', '""')}"`
+            ).join(",")
+          )
+          .join("\n");
 
-    usuarios.filter(
-      (u) =>
-        u.activo
-    ).length;
+      const blob =
+        new Blob(
+          [csvContent],
+          {
+            type:
+              "text/csv;charset=utf-8;",
+          }
+        );
 
-  // =====================================
-  // LOADING
-  // =====================================
+      const url =
+        URL.createObjectURL(blob);
+
+      const link =
+        document.createElement("a");
+
+      link.href = url;
+
+      link.download =
+        "usuarios.csv";
+
+      link.click();
+
+      URL.revokeObjectURL(url);
+    };
+
+  const limpiarFiltros =
+    () => {
+
+      setBusqueda("");
+
+      setFiltroRol("todos");
+
+      setFiltroEstado("todos");
+    };
 
   if (loading) {
 
     return (
-
       <div className="p-10">
-
         Cargando usuarios...
-
       </div>
     );
   }
 
   return (
-
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
 
       <div className="max-w-7xl mx-auto">
 
-        {/* HEADER */}
-        <div className="mb-10">
+        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 mb-8">
 
-          <h1 className="text-5xl font-black text-gray-900">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-black text-gray-900">
+              Usuarios
+            </h1>
+            <p className="text-gray-500 mt-3 text-lg">
+              Gestiona clientes, administradores, roles y accesos.
+            </p>
+          </div>
 
-            Usuarios
+          <button
+            onClick={exportarCSV}
+            className="inline-flex items-center justify-center gap-2 bg-primary text-white px-6 py-4 rounded-2xl font-semibold shadow-lg hover:opacity-90 transition"
+          >
+            <Download className="w-5 h-5" />
+            Exportar CSV
+          </button>
 
-          </h1>
+        </div>
 
-          <p className="text-gray-500 mt-3 text-lg">
+        <div className="grid md:grid-cols-4 gap-5 mb-8">
 
-            Gestión avanzada de usuarios
+          {[
+            {
+              label: "Total usuarios",
+              value: usuarios.length,
+              icon: Users,
+              className: "bg-primary/10 text-primary",
+            },
+            {
+              label: "Administradores",
+              value: totalAdmins,
+              icon: ShieldCheck,
+              className: "bg-purple-100 text-purple-600",
+            },
+            {
+              label: "Activos",
+              value: totalActivos,
+              icon: UserCheck,
+              className: "bg-green-100 text-green-600",
+            },
+            {
+              label: "Bloqueados",
+              value: totalBloqueados,
+              icon: UserX,
+              className: "bg-red-100 text-red-600",
+            },
+          ].map((item) => {
 
+            const Icon =
+              item.icon;
+
+            return (
+              <div
+                key={item.label}
+                className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex items-center justify-between"
+              >
+                <div>
+                  <p className="text-gray-500 font-semibold">
+                    {item.label}
+                  </p>
+                  <h2 className="text-4xl font-black mt-2">
+                    {item.value}
+                  </h2>
+                </div>
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${item.className}`}>
+                  <Icon className="w-7 h-7" />
+                </div>
+              </div>
+            );
+          })}
+
+        </div>
+
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 md:p-6 mb-8">
+
+          <div className="grid lg:grid-cols-[1fr_180px_180px_auto] gap-4">
+
+            <div className="relative">
+              <Search className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar por nombre, correo o teléfono..."
+                value={busqueda}
+                onChange={(e) =>
+                  setBusqueda(e.target.value)
+                }
+                className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+
+            <select
+              value={filtroRol}
+              onChange={(e) =>
+                setFiltroRol(e.target.value)
+              }
+              className="px-5 py-4 border border-gray-200 rounded-2xl outline-none bg-white"
+            >
+              <option value="todos">Todos los roles</option>
+              <option value="admin">Admins</option>
+              <option value="cliente">Clientes</option>
+            </select>
+
+            <select
+              value={filtroEstado}
+              onChange={(e) =>
+                setFiltroEstado(e.target.value)
+              }
+              className="px-5 py-4 border border-gray-200 rounded-2xl outline-none bg-white"
+            >
+              <option value="todos">Todos</option>
+              <option value="activos">Activos</option>
+              <option value="bloqueados">Bloqueados</option>
+            </select>
+
+            <button
+              onClick={limpiarFiltros}
+              className="px-5 py-4 rounded-2xl border font-semibold text-gray-600 hover:bg-gray-50"
+            >
+              Limpiar
+            </button>
+
+          </div>
+
+          <p className="mt-4 text-sm text-gray-500">
+            Mostrando {usuariosFiltrados.length} de {usuarios.length} usuarios.
           </p>
 
         </div>
 
-        {/* STATS */}
-        <div className="grid md:grid-cols-3 gap-6 mb-10">
-
-          {/* TOTAL */}
-          <div className="bg-white rounded-[2rem] p-7 shadow-lg">
-
-            <div className="flex items-center justify-between">
-
-              <div>
-
-                <p className="text-gray-500">
-                  Total usuarios
-                </p>
-
-                <h2 className="text-5xl font-black mt-3">
-
-                  {usuarios.length}
-
-                </h2>
-
-              </div>
-
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
-
-                <Users className="w-8 h-8" />
-
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* ADMINS */}
-          <div className="bg-white rounded-[2rem] p-7 shadow-lg">
-
-            <div className="flex items-center justify-between">
-
-              <div>
-
-                <p className="text-gray-500">
-                  Administradores
-                </p>
-
-                <h2 className="text-5xl font-black mt-3 text-purple-600">
-
-                  {totalAdmins}
-
-                </h2>
-
-              </div>
-
-              <div className="w-16 h-16 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center">
-
-                <ShieldCheck className="w-8 h-8" />
-
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* ACTIVOS */}
-          <div className="bg-white rounded-[2rem] p-7 shadow-lg">
-
-            <div className="flex items-center justify-between">
-
-              <div>
-
-                <p className="text-gray-500">
-                  Activos
-                </p>
-
-                <h2 className="text-5xl font-black mt-3 text-green-600">
-
-                  {totalActivos}
-
-                </h2>
-
-              </div>
-
-              <div className="w-16 h-16 rounded-2xl bg-green-100 text-green-600 flex items-center justify-center">
-
-                <UserCheck className="w-8 h-8" />
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* FILTROS */}
-        <div className="bg-white rounded-[2rem] shadow-lg p-6 mb-8">
-
-          <div className="flex flex-col md:flex-row gap-4">
-
-            {/* SEARCH */}
-            <div className="flex-1 relative">
-
-              <Search className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
-
-              <input
-                type="text"
-                placeholder="Buscar usuario..."
-                value={busqueda}
-                onChange={(e) =>
-                  setBusqueda(
-                    e.target.value
-                  )
-                }
-                className="w-full pl-12 pr-4 py-4 border rounded-2xl outline-none focus:ring-2 focus:ring-primary"
-              />
-
-            </div>
-
-            {/* FILTRO */}
-            <select
-              value={filtroRol}
-              onChange={(e) =>
-                setFiltroRol(
-                  e.target.value
-                )
-              }
-              className="px-5 py-4 border rounded-2xl outline-none"
-            >
-
-              <option value="todos">
-                Todos
-              </option>
-
-              <option value="admin">
-                Admins
-              </option>
-
-              <option value="cliente">
-                Clientes
-              </option>
-
-            </select>
-
-          </div>
-
-        </div>
-
-        {/* TABLA */}
-        <div className="bg-white rounded-[2rem] shadow-lg overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
 
           <div className="overflow-x-auto">
 
-            <table className="w-full">
+            <table className="w-full min-w-[980px]">
 
               <thead className="bg-gray-50">
-
                 <tr>
-
-                  <th className="text-left p-5">
-                    Usuario
-                  </th>
-
-                  <th className="text-left p-5">
-                    Rol
-                  </th>
-
-                  <th className="text-left p-5">
-                    Estado
-                  </th>
-
-                  <th className="text-left p-5">
-                    Registro
-                  </th>
-
-                  <th className="text-left p-5">
-                    Acciones
-                  </th>
-
+                  <th className="text-left p-5">Usuario</th>
+                  <th className="text-left p-5">Contacto</th>
+                  <th className="text-left p-5">Rol</th>
+                  <th className="text-left p-5">Estado</th>
+                  <th className="text-left p-5">Registro</th>
+                  <th className="text-left p-5">Acciones</th>
                 </tr>
-
               </thead>
 
               <tbody>
+                {usuariosFiltrados.map((usuario) => {
 
-                {usuariosFiltrados.map(
-                  (usuario) => (
+                  const isCurrentUser =
+                    usuarioActual?.id_usuario ===
+                    usuario.id_usuario;
 
-                  <tr
-                    key={
-                      usuario.id_usuario
-                    }
-                    className="border-t hover:bg-gray-50 transition"
-                  >
-
-                    {/* USER */}
-                    <td className="p-5">
-
-                      <div className="flex items-center gap-4">
-
-                        <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
-
-                          {usuario.nombre.charAt(0)}
-
+                  return (
+                    <tr
+                      key={usuario.id_usuario}
+                      className="border-t border-gray-100 hover:bg-gray-50 transition"
+                    >
+                      <td className="p-5">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black">
+                            {usuario.nombre.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-900">
+                              {usuario.nombre}
+                            </p>
+                            {isCurrentUser && (
+                              <p className="text-xs font-semibold text-primary">
+                                Tu usuario
+                              </p>
+                            )}
+                          </div>
                         </div>
+                      </td>
 
-                        <div>
+                      <td className="p-5">
+                        <p className="font-semibold text-gray-700 break-all">
+                          {usuario.correo}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {usuario.telefono || "Sin teléfono"}
+                        </p>
+                      </td>
 
-                          <p className="font-semibold">
-
-                            {usuario.nombre}
-
-                          </p>
-
-                          <p className="text-sm text-gray-500">
-
-                            {usuario.correo}
-
-                          </p>
-
-                        </div>
-
-                      </div>
-
-                    </td>
-
-                    {/* ROL */}
-                    <td className="p-5">
-
-                      <select
-                        value={usuario.rol}
-                        onChange={(e) =>
-                          cambiarRol(
-                            usuario.id_usuario,
-                            e.target.value
-                          )
-                        }
-                        className="border rounded-xl px-3 py-2"
-                      >
-
-                        <option value="cliente">
-                          Cliente
-                        </option>
-
-                        <option value="admin">
-                          Admin
-                        </option>
-
-                      </select>
-
-                    </td>
-
-                    {/* ESTADO */}
-                    <td className="p-5">
-
-                      <span
-                        className={`px-4 py-2 rounded-full text-sm font-semibold
-                        ${
-                          usuario.activo
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-
-                        {usuario.activo
-                          ? "Activo"
-                          : "Bloqueado"}
-
-                      </span>
-
-                    </td>
-
-                    {/* FECHA */}
-                    <td className="p-5 text-gray-500">
-
-                      {usuario.fecha_registro
-
-                        ? new Date(
-                            usuario.fecha_registro
-                          ).toLocaleDateString(
-                            "es-CO"
-                          )
-
-                        : "-"}
-
-                    </td>
-
-                    {/* ACCIONES */}
-                    <td className="p-5">
-
-                      <div className="flex items-center gap-3">
-
-                        {/* BLOQUEAR */}
-                        <button
-                          onClick={() =>
-                            toggleUsuario(
+                      <td className="p-5">
+                        <select
+                          value={usuario.rol}
+                          disabled={isCurrentUser}
+                          onChange={(e) =>
+                            cambiarRol(
                               usuario.id_usuario,
-                              !!usuario.activo
+                              e.target.value
                             )
                           }
-                          className={`p-3 rounded-xl text-white transition
+                          className="border rounded-xl px-3 py-2 disabled:bg-gray-100 disabled:text-gray-400"
+                        >
+                          <option value="cliente">Cliente</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </td>
+
+                      <td className="p-5">
+                        <span
+                          className={`px-4 py-2 rounded-full text-sm font-semibold
                           ${
                             usuario.activo
-                              ? "bg-yellow-500 hover:bg-yellow-600"
-                              : "bg-green-600 hover:bg-green-700"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
                           }`}
                         >
-
                           {usuario.activo
-                            ? (
-                              <Lock className="w-5 h-5" />
-                            ) : (
-                              <Unlock className="w-5 h-5" />
-                            )}
+                            ? "Activo"
+                            : "Bloqueado"}
+                        </span>
+                      </td>
 
-                        </button>
+                      <td className="p-5 text-gray-500">
+                        {formatDate(
+                          usuario.fecha_registro
+                        )}
+                      </td>
 
-                        {/* ELIMINAR */}
-                        <button
-                          onClick={() =>
-                            eliminarUsuario(
-                              usuario.id_usuario
-                            )
-                          }
-                          className="p-3 rounded-xl bg-red-500 hover:bg-red-600 text-white transition"
-                        >
+                      <td className="p-5">
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() =>
+                              toggleUsuario(usuario)
+                            }
+                            disabled={isCurrentUser}
+                            className={`p-3 rounded-xl text-white transition disabled:bg-gray-300 disabled:cursor-not-allowed
+                            ${
+                              usuario.activo
+                                ? "bg-yellow-500 hover:bg-yellow-600"
+                                : "bg-green-600 hover:bg-green-700"
+                            }`}
+                            title={usuario.activo ? "Bloquear" : "Activar"}
+                          >
+                            {usuario.activo
+                              ? <Lock className="w-5 h-5" />
+                              : <Unlock className="w-5 h-5" />}
+                          </button>
 
-                          <Trash2 className="w-5 h-5" />
-
-                        </button>
-
-                      </div>
-
-                    </td>
-
-                  </tr>
-                ))}
-
+                          <button
+                            onClick={() =>
+                              eliminarUsuario(usuario)
+                            }
+                            disabled={isCurrentUser}
+                            className="p-3 rounded-xl bg-red-500 hover:bg-red-600 text-white transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+                            title="Eliminar"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
 
             </table>
 
           </div>
+
+          {usuariosFiltrados.length === 0 && (
+            <div className="p-10 text-center text-gray-500">
+              No hay usuarios que coincidan con los filtros.
+            </div>
+          )}
 
         </div>
 

@@ -142,10 +142,74 @@ export default function AdminLayout({
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="min-h-screen bg-gray-100 lg:flex">
+
+      {/* MOBILE HEADER */}
+      <header className="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-200">
+
+        <div className="px-4 py-4 flex items-center justify-between gap-4">
+
+          <Link
+            href="/admin"
+            className="font-black text-2xl shrink-0"
+          >
+            <span className="text-primary">
+              MAFE
+            </span>
+            <span className="text-dark">
+              Admin
+            </span>
+          </Link>
+
+          <button
+            onClick={() => {
+
+              logout();
+
+              router.push("/");
+            }}
+            className="w-11 h-11 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center"
+            aria-label="Cerrar sesión"
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
+
+        </div>
+
+        <nav className="px-4 pb-4 flex gap-2 overflow-x-auto scrollbar-hide">
+
+          {links.map((link) => {
+
+            const Icon =
+              link.icon;
+
+            const active =
+              pathname ===
+              link.href;
+
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`shrink-0 inline-flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-semibold transition
+                ${
+                  active
+                    ? "bg-primary text-white shadow"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {link.label}
+              </Link>
+            );
+          })}
+
+        </nav>
+
+      </header>
 
       {/* SIDEBAR */}
-      <aside className="w-72 bg-white border-r border-gray-200 shadow-sm flex flex-col">
+      <aside className="hidden lg:flex w-72 bg-white border-r border-gray-200 shadow-sm flex-col sticky top-0 h-screen">
 
         {/* HEADER */}
         <div className="p-8 border-b">
@@ -261,7 +325,7 @@ export default function AdminLayout({
       </aside>
 
       {/* CONTENT */}
-      <main className="flex-1 overflow-y-auto p-8">
+      <main className="min-w-0 flex-1 overflow-y-auto p-3 sm:p-5 lg:p-8">
 
         {children}
 

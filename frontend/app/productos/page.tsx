@@ -261,7 +261,7 @@ export default function ProductosPage() {
       {/* HERO */}
       {/* ===================================== */}
 
-      <section className="relative px-6 md:px-10 pt-24 pb-16">
+      <section className="relative px-4 sm:px-6 md:px-10 pt-20 md:pt-24 pb-14 md:pb-16">
 
         {/* BG */}
         <div className="absolute inset-0 bg-brand-gradient opacity-[0.05]" />
@@ -276,7 +276,7 @@ export default function ProductosPage() {
 
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-black text-dark leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-dark leading-tight">
 
             Descubre nuestros
             <span className="text-primary block">
@@ -303,7 +303,7 @@ export default function ProductosPage() {
       {/* CONTENIDO */}
       {/* ===================================== */}
 
-      <section className="px-6 md:px-10 pb-24">
+      <section className="px-4 sm:px-6 md:px-10 pb-20 md:pb-24">
 
         <div className="max-w-7xl mx-auto">
 
@@ -315,7 +315,7 @@ export default function ProductosPage() {
 
             <aside className="lg:sticky lg:top-8 h-fit">
 
-              <div className="bg-white/90 backdrop-blur-xl border border-white rounded-[2rem] shadow-xl p-6">
+              <div className="bg-white/90 backdrop-blur-xl border border-white rounded-[2rem] shadow-xl p-4 sm:p-6">
 
                 {/* TITLE */}
                 <div className="flex items-center gap-3 mb-8">
@@ -507,7 +507,7 @@ export default function ProductosPage() {
 
                 <div>
 
-                  <h2 className="text-4xl font-black text-dark">
+                  <h2 className="text-3xl sm:text-4xl font-black text-dark">
 
                     Productos
 
@@ -561,7 +561,7 @@ export default function ProductosPage() {
               {/* EMPTY */}
               {productosFiltrados.length === 0 ? (
 
-                <div className="bg-white rounded-[2rem] shadow-xl p-16 text-center fade-in">
+                <div className="bg-white rounded-[2rem] shadow-xl p-8 sm:p-16 text-center fade-in">
 
                   <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
 
@@ -569,7 +569,7 @@ export default function ProductosPage() {
 
                   </div>
 
-                  <h3 className="text-3xl font-black text-dark mt-8">
+                  <h3 className="text-2xl sm:text-3xl font-black text-dark mt-8">
 
                     No encontramos productos
 
@@ -613,14 +613,14 @@ export default function ProductosPage() {
               )}
 
               {/* CTA */}
-              <div className="relative overflow-hidden mt-16 rounded-[3rem] bg-brand-gradient p-10 md:p-14 text-white shadow-2xl">
+              <div className="relative overflow-hidden mt-16 rounded-[2rem] md:rounded-[3rem] bg-brand-gradient p-6 sm:p-10 md:p-14 text-white shadow-2xl">
 
                 {/* BG */}
                 <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full blur-3xl" />
 
                 <div className="relative z-10 text-center">
 
-                  <h2 className="text-4xl md:text-5xl font-black leading-tight">
+                  <h2 className="text-3xl md:text-5xl font-black leading-tight">
 
                     ¿Necesitas ayuda
                     para elegir?

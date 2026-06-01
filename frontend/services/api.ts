@@ -1,6 +1,6 @@
 import { Producto } from "@/types/producto";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // 🔹 Obtener TODOS los productos
 export const getProductos = async (): Promise<Producto[]> => {

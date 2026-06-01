@@ -37,6 +37,10 @@ interface Pedido {
 
   usuario_nombre: string;
 
+  usuario_correo?: string;
+
+  usuario_telefono?: string;
+
   total: number;
 
   estado: string;
@@ -72,6 +76,12 @@ interface DetallePedido {
   fecha: string;
 
   productos: ProductoDetalle[];
+
+  usuario?: {
+    nombre: string;
+    correo: string;
+    telefono: string;
+  } | null;
 }
 
 export default function AdminPedidosPage() {
@@ -94,6 +104,14 @@ export default function AdminPedidosPage() {
   const [filtroEstado,
     setFiltroEstado] =
       useState("todos");
+
+  const [fechaDesde,
+    setFechaDesde] =
+      useState("");
+
+  const [fechaHasta,
+    setFechaHasta] =
+      useState("");
 
   // =====================================
   // MODAL
@@ -184,9 +202,26 @@ export default function AdminPedidosPage() {
               : pedido.estado ===
                 filtroEstado;
 
+          const fechaPedido =
+            new Date(pedido.fecha);
+
+          const matchFechaDesde =
+            fechaDesde
+              ? fechaPedido >=
+                new Date(`${fechaDesde}T00:00:00`)
+              : true;
+
+          const matchFechaHasta =
+            fechaHasta
+              ? fechaPedido <=
+                new Date(`${fechaHasta}T23:59:59`)
+              : true;
+
           return (
             matchBusqueda &&
-            matchEstado
+            matchEstado &&
+            matchFechaDesde &&
+            matchFechaHasta
           );
         }
       );
@@ -195,6 +230,8 @@ export default function AdminPedidosPage() {
       pedidos,
       busqueda,
       filtroEstado,
+      fechaDesde,
+      fechaHasta,
     ]);
 
   // =====================================
@@ -304,8 +341,11 @@ export default function AdminPedidosPage() {
     const headers = [
       "ID",
       "Cliente",
+      "Correo",
+      "Telefono",
       "Estado",
       "Total",
+      "Direccion",
       "Fecha",
     ];
 
@@ -314,8 +354,11 @@ export default function AdminPedidosPage() {
         (pedido) => [
           pedido.id_pedido,
           pedido.usuario_nombre,
+          pedido.usuario_correo || "",
+          pedido.usuario_telefono || "",
           pedido.estado,
           pedido.total,
+          pedido.direccion_envio,
           new Date(
             pedido.fecha
           ).toLocaleDateString(
@@ -327,7 +370,9 @@ export default function AdminPedidosPage() {
     const csvContent =
       [headers, ...rows]
         .map((e) =>
-          e.join(",")
+          e.map((value) =>
+            `"${String(value).replaceAll('"', '""')}"`
+          ).join(",")
         )
         .join("\n");
 
@@ -352,6 +397,20 @@ export default function AdminPedidosPage() {
       "pedidos.csv";
 
     link.click();
+
+    URL.revokeObjectURL(url);
+  };
+
+  const limpiarFiltros =
+    () => {
+
+      setBusqueda("");
+
+      setFiltroEstado("todos");
+
+      setFechaDesde("");
+
+      setFechaHasta("");
   };
 
   // =====================================
@@ -414,7 +473,7 @@ export default function AdminPedidosPage() {
 
             <p className="text-gray-500 mt-3 text-lg">
 
-              Gestión avanzada de pedidos
+              Gestión avanzada de pedidos, estados y ventas
 
             </p>
 
@@ -542,7 +601,7 @@ export default function AdminPedidosPage() {
         {/* FILTROS */}
         <div className="bg-white rounded-[2rem] shadow-lg p-6 mb-8">
 
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="grid lg:grid-cols-[1fr_180px_170px_170px_auto] gap-4">
 
             {/* SEARCH */}
             <div className="flex-1 relative">
@@ -604,7 +663,36 @@ export default function AdminPedidosPage() {
 
             </select>
 
+            <input
+              type="date"
+              value={fechaDesde}
+              onChange={(e) =>
+                setFechaDesde(e.target.value)
+              }
+              className="px-5 py-4 border rounded-2xl outline-none"
+            />
+
+            <input
+              type="date"
+              value={fechaHasta}
+              onChange={(e) =>
+                setFechaHasta(e.target.value)
+              }
+              className="px-5 py-4 border rounded-2xl outline-none"
+            />
+
+            <button
+              onClick={limpiarFiltros}
+              className="px-5 py-4 rounded-2xl border font-semibold text-gray-600 hover:bg-gray-50"
+            >
+              Limpiar
+            </button>
+
           </div>
+
+          <p className="mt-4 text-sm text-gray-500">
+            Mostrando {pedidosFiltrados.length} de {pedidos.length} pedidos
+          </p>
 
         </div>
 
@@ -777,7 +865,7 @@ export default function AdminPedidosPage() {
             {/* HEADER */}
             <div className="p-6 md:p-8 border-b flex items-start justify-between">
 
-              <div>
+                        <div>
 
                 <h2 className="text-3xl md:text-4xl font-black">
 
@@ -917,6 +1005,42 @@ export default function AdminPedidosPage() {
                 </p>
 
               </div>
+
+              {detallePedido.usuario && (
+                <div className="bg-gray-50 rounded-3xl p-8">
+
+                  <h3 className="font-black text-2xl mb-4">
+                    Datos del cliente
+                  </h3>
+
+                  <div className="grid md:grid-cols-3 gap-4 text-gray-600">
+                    <div>
+                      <p className="text-sm text-gray-400">Nombre</p>
+                      <p className="font-semibold">{detallePedido.usuario.nombre}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400">Correo</p>
+                      <p className="font-semibold break-all">{detallePedido.usuario.correo}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400">Teléfono</p>
+                      <p className="font-semibold">{detallePedido.usuario.telefono || "-"}</p>
+                    </div>
+                  </div>
+
+                  {detallePedido.usuario.telefono && (
+                    <a
+                      href={`https://wa.me/57${detallePedido.usuario.telefono.replace(/\D/g, "").replace(/^57/, "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-6 inline-flex bg-green-600 text-white px-5 py-3 rounded-2xl font-semibold hover:bg-green-700 transition"
+                    >
+                      Contactar por WhatsApp
+                    </a>
+                  )}
+
+                </div>
+              )}
 
               {/* PRODUCTOS */}
               <div>

@@ -77,6 +77,25 @@ body {
     antialiased;
 }
 
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  min-width: 0;
+}
+
+table {
+  border-collapse: collapse;
+}
+
 /* ==================================================
    SCROLLBAR
 ================================================== */

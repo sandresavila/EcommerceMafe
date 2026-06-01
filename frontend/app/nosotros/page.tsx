@@ -18,7 +18,7 @@ export default function NosotrosPage() {
       {/* HERO */}
       {/* ===================================== */}
 
-      <section className="relative px-6 md:px-10 pt-24 pb-28">
+      <section className="relative px-4 sm:px-6 md:px-10 pt-20 md:pt-24 pb-20 md:pb-28">
 
         {/* BG */}
         <div className="absolute inset-0 bg-brand-gradient opacity-[0.06]" />
@@ -36,7 +36,7 @@ export default function NosotrosPage() {
 
               </div>
 
-              <h1 className="text-5xl md:text-7xl font-black text-dark leading-tight">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-dark leading-tight">
 
                 Más que belleza,
                 <span className="text-primary block">
@@ -110,7 +110,7 @@ export default function NosotrosPage() {
       {/* HISTORIA */}
       {/* ===================================== */}
 
-      <section className="px-6 md:px-10 py-24">
+      <section className="px-4 sm:px-6 md:px-10 py-20 md:py-24">
 
         <div className="max-w-7xl mx-auto">
 
@@ -178,7 +178,7 @@ export default function NosotrosPage() {
       {/* VALORES */}
       {/* ===================================== */}
 
-      <section className="px-6 md:px-10 py-24">
+      <section className="px-4 sm:px-6 md:px-10 py-20 md:py-24">
 
         <div className="max-w-7xl mx-auto text-center">
 
@@ -286,7 +286,7 @@ export default function NosotrosPage() {
       {/* CTA */}
       {/* ===================================== */}
 
-      <section className="px-6 md:px-10 pb-24">
+      <section className="px-4 sm:px-6 md:px-10 pb-20 md:pb-24">
 
         <div className="max-w-7xl mx-auto">
 
@@ -299,7 +299,7 @@ export default function NosotrosPage() {
 
             <div className="relative z-10">
 
-              <h2 className="text-4xl md:text-6xl font-black leading-tight">
+              <h2 className="text-3xl sm:text-4xl md:text-6xl font-black leading-tight">
 
                 Descubre lo mejor
                 para tu cuidado personal

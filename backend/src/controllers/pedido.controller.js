@@ -4,6 +4,12 @@ import {
   transporter,
 } from "../utils/mailer.js";
 
+import {
+  getStoreUrl,
+  orderCreatedEmailTemplate,
+  orderStatusEmailTemplate,
+} from "../utils/emailTemplates.js";
+
 // =====================================
 // CREAR PEDIDO
 // =====================================
@@ -203,59 +209,6 @@ export const crearPedido =
       }
 
       // =====================================
-      // HTML PRODUCTOS
-      // =====================================
-
-      const productosHTML =
-        productos.map(
-          (item) => {
-
-            const subtotal =
-              item.precio *
-              item.cantidad;
-
-            return `
-              <tr>
-
-                <td style="
-                  padding: 12px;
-                  border-bottom: 1px solid #eee;
-                ">
-                  ${item.nombre}
-                </td>
-
-                <td style="
-                  padding: 12px;
-                  border-bottom: 1px solid #eee;
-                  text-align: center;
-                ">
-                  ${item.cantidad}
-                </td>
-
-                <td style="
-                  padding: 12px;
-                  border-bottom: 1px solid #eee;
-                  text-align: right;
-                ">
-                  $${Number(item.precio)
-                    .toLocaleString("es-CO")}
-                </td>
-
-                <td style="
-                  padding: 12px;
-                  border-bottom: 1px solid #eee;
-                  text-align: right;
-                ">
-                  $${subtotal
-                    .toLocaleString("es-CO")}
-                </td>
-
-              </tr>
-            `;
-          }
-        ).join("");
-
-      // =====================================
       // COMMIT
       // =====================================
 
@@ -276,181 +229,26 @@ export const crearPedido =
             usuario.correo,
 
           subject:
-            `📦 Pedido #${id_pedido} confirmado`,
+            `Pedido #${id_pedido} creado en MAFE Beauty`,
 
-          html: `
-            <div style="
-              font-family: Arial;
-              background: #f9fafb;
-              padding: 40px;
-            ">
+          html:
+            orderCreatedEmailTemplate({
+              idPedido:
+                id_pedido,
 
-              <div style="
-                max-width: 700px;
-                margin: auto;
-                background: white;
-                border-radius: 20px;
-                overflow: hidden;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-              ">
+              nombre:
+                usuario.nombre,
 
-                <!-- HEADER -->
-                <div style="
-                  background: linear-gradient(
-                    135deg,
-                    #ec4899,
-                    #f472b6
-                  );
-                  color: white;
-                  padding: 40px;
-                  text-align: center;
-                ">
+              direccion:
+                direccion_envio,
 
-                  <h1 style="
-                    margin: 0;
-                    font-size: 38px;
-                  ">
-                    Pedido confirmado 📦
-                  </h1>
+              productos,
 
-                  <p style="
-                    margin-top: 10px;
-                    font-size: 18px;
-                  ">
-                    Gracias por comprar en
-                    MAFE Beauty
-                  </p>
+              total,
 
-                </div>
-
-                <!-- BODY -->
-                <div style="
-                  padding: 40px;
-                ">
-
-                  <h2 style="
-                    color: #ec4899;
-                  ">
-                    Hola ${usuario.nombre} 💖
-                  </h2>
-
-                  <p>
-                    Tu pedido fue creado exitosamente.
-                  </p>
-
-                  <!-- INFO -->
-                  <div style="
-                    background: #f3f4f6;
-                    padding: 20px;
-                    border-radius: 14px;
-                    margin: 30px 0;
-                  ">
-
-                    <p>
-                      <strong>Pedido:</strong>
-                      #${id_pedido}
-                    </p>
-
-                    <p>
-                      <strong>Estado:</strong>
-                      pendiente
-                    </p>
-
-                    <p>
-                      <strong>Dirección:</strong>
-                      ${direccion_envio}
-                    </p>
-
-                  </div>
-
-                  <!-- TABLA -->
-                  <table style="
-                    width: 100%;
-                    border-collapse: collapse;
-                  ">
-
-                    <thead>
-
-                      <tr style="
-                        background: #ec4899;
-                        color: white;
-                      ">
-
-                        <th style="
-                          padding: 14px;
-                          text-align: left;
-                        ">
-                          Producto
-                        </th>
-
-                        <th style="
-                          padding: 14px;
-                        ">
-                          Cantidad
-                        </th>
-
-                        <th style="
-                          padding: 14px;
-                          text-align: right;
-                        ">
-                          Precio
-                        </th>
-
-                        <th style="
-                          padding: 14px;
-                          text-align: right;
-                        ">
-                          Subtotal
-                        </th>
-
-                      </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                      ${productosHTML}
-
-                    </tbody>
-
-                  </table>
-
-                  <!-- TOTAL -->
-                  <div style="
-                    margin-top: 30px;
-                    text-align: right;
-                  ">
-
-                    <h2 style="
-                      color: #ec4899;
-                    ">
-
-                      Total:
-                      $${Number(total)
-                        .toLocaleString("es-CO")}
-
-                    </h2>
-
-                  </div>
-
-                </div>
-
-                <!-- FOOTER -->
-                <div style="
-                  background: #f3f4f6;
-                  padding: 25px;
-                  text-align: center;
-                  color: #6b7280;
-                ">
-
-                  © 2026 MAFE Beauty
-
-                </div>
-
-              </div>
-
-            </div>
-          `,
+              orderUrl:
+                `${getStoreUrl()}/pedido/${id_pedido}`,
+            }),
         });
 
       } catch (emailError) {
@@ -505,7 +303,9 @@ export const obtenerPedidos =
           `
           SELECT
             p.*,
-            u.nombre AS usuario_nombre
+            u.nombre AS usuario_nombre,
+            u.correo AS usuario_correo,
+            u.telefono AS usuario_telefono
 
           FROM pedidos p
 
@@ -625,6 +425,24 @@ export const obtenerDetallePedido =
           [id]
         );
 
+      const [usuarioRows] =
+        await pool.query(
+          `
+          SELECT
+            u.nombre,
+            u.correo,
+            u.telefono
+
+          FROM pedidos p
+
+          INNER JOIN usuarios u
+          ON p.id_usuario = u.id_usuario
+
+          WHERE p.id_pedido = ?
+          `,
+          [id]
+        );
+
       res.json({
 
         id_pedido:
@@ -641,6 +459,9 @@ export const obtenerDetallePedido =
 
         fecha:
           pedidoRows[0].fecha,
+
+        usuario:
+          usuarioRows[0] || null,
 
         productos,
       });
@@ -671,6 +492,27 @@ export const actualizarEstadoPedido =
       const { estado } =
         req.body;
 
+      const estadosPermitidos = [
+        "pendiente",
+        "pagado",
+        "preparando",
+        "enviado",
+        "entregado",
+        "cancelado",
+      ];
+
+      if (
+        !estadosPermitidos.includes(
+          estado
+        )
+      ) {
+
+        return res.status(400).json({
+          message:
+            "Estado inválido",
+        });
+      }
+
       await pool.query(
         `
         UPDATE pedidos
@@ -684,6 +526,78 @@ export const actualizarEstadoPedido =
           id,
         ]
       );
+
+      const [pedidoRows] =
+        await pool.query(
+          `
+          SELECT
+            p.id_pedido,
+            p.total,
+            p.estado,
+            p.direccion_envio,
+            u.nombre AS usuario_nombre,
+            u.correo AS usuario_correo
+
+          FROM pedidos p
+
+          INNER JOIN usuarios u
+          ON p.id_usuario = u.id_usuario
+
+          WHERE p.id_pedido = ?
+          `,
+          [id]
+        );
+
+      if (
+        pedidoRows.length > 0
+      ) {
+
+        const pedido =
+          pedidoRows[0];
+
+        try {
+
+          await transporter.sendMail({
+
+            from:
+              `"MAFE Beauty" <${process.env.EMAIL_USER}>`,
+
+            to:
+              pedido.usuario_correo,
+
+            subject:
+              `Pedido #${pedido.id_pedido}: ${pedido.estado}`,
+
+            html:
+              orderStatusEmailTemplate({
+                idPedido:
+                  pedido.id_pedido,
+
+                nombre:
+                  pedido.usuario_nombre,
+
+                estado:
+                  pedido.estado,
+
+                direccion:
+                  pedido.direccion_envio,
+
+                total:
+                  pedido.total,
+
+                orderUrl:
+                  `${getStoreUrl()}/pedido/${pedido.id_pedido}`,
+              }),
+          });
+
+        } catch (emailError) {
+
+          console.error(
+            "Error enviando email de estado:",
+            emailError
+          );
+        }
+      }
 
       res.json({
         message:
@@ -739,6 +653,76 @@ export const dashboardAdmin =
           `
           SELECT SUM(total) AS total
           FROM pedidos
+          `
+        );
+
+      const [ventasMes] =
+        await pool.query(
+          `
+          SELECT SUM(total) AS total
+
+          FROM pedidos
+
+          WHERE MONTH(fecha) = MONTH(CURRENT_DATE())
+          AND YEAR(fecha) = YEAR(CURRENT_DATE())
+          `
+        );
+
+      const [ventasHoy] =
+        await pool.query(
+          `
+          SELECT SUM(total) AS total
+
+          FROM pedidos
+
+          WHERE DATE(fecha) = CURRENT_DATE()
+          `
+        );
+
+      const [ticketPromedio] =
+        await pool.query(
+          `
+          SELECT AVG(total) AS total
+          FROM pedidos
+          `
+        );
+
+      const [pedidosPorEstado] =
+        await pool.query(
+          `
+          SELECT
+            estado,
+            COUNT(*) AS total
+
+          FROM pedidos
+
+          GROUP BY estado
+          `
+        );
+
+      const [topProductos] =
+        await pool.query(
+          `
+          SELECT
+            pr.id_producto,
+            pr.nombre,
+            pr.imagen_url,
+            SUM(pd.cantidad) AS unidades_vendidas,
+            SUM(pd.cantidad * pd.precio_unitario) AS total_vendido
+
+          FROM pedido_detalle pd
+
+          INNER JOIN productos pr
+          ON pd.id_producto = pr.id_producto
+
+          GROUP BY
+            pr.id_producto,
+            pr.nombre,
+            pr.imagen_url
+
+          ORDER BY unidades_vendidas DESC
+
+          LIMIT 5
           `
         );
 
@@ -815,8 +799,21 @@ export const dashboardAdmin =
         totalVentas:
           ventas[0].total || 0,
 
+        ventasMes:
+          ventasMes[0].total || 0,
+
+        ventasHoy:
+          ventasHoy[0].total || 0,
+
+        ticketPromedio:
+          ticketPromedio[0].total || 0,
+
         pedidosPendientes:
           pendientes[0].total,
+
+        pedidosPorEstado,
+
+        topProductos,
 
         productosStockBajo:
           stockBajo,

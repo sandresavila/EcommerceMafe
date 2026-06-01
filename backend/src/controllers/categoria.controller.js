@@ -11,9 +11,23 @@ export const obtenerCategorias =
 
       const [rows] =
         await pool.query(`
-          SELECT *
-          FROM categorias
-          ORDER BY nombre ASC
+          SELECT
+            c.id_categoria,
+            c.nombre,
+            c.descripcion,
+            COUNT(p.id_producto) AS total_productos
+
+          FROM categorias c
+
+          LEFT JOIN productos p
+          ON p.id_categoria = c.id_categoria
+
+          GROUP BY
+            c.id_categoria,
+            c.nombre,
+            c.descripcion
+
+          ORDER BY c.nombre ASC
         `);
 
       res.json(rows);

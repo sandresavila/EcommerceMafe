@@ -255,7 +255,7 @@ export default function Navbar() {
 
                 </div>
 
-                <div className="leading-tight">
+                <div className="hidden sm:block leading-tight">
 
                   <h1 className="text-2xl font-black tracking-tight">
 
@@ -402,7 +402,7 @@ export default function Navbar() {
                 {/* MENU */}
                 {showUserMenu && (
 
-                  <div className="absolute right-0 mt-4 w-80 bg-white rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden animate-fade-in">
+                  <div className="absolute right-0 mt-4 w-[calc(100vw-2rem)] sm:w-80 max-w-[20rem] bg-white rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden animate-fade-in">
 
                     {/* TOP */}
                     <div className="bg-brand-gradient p-6 text-white relative overflow-hidden">
@@ -651,7 +651,7 @@ export default function Navbar() {
 
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">
 
-          <div className="bg-white w-full max-w-md rounded-[2.5rem] p-10 relative shadow-2xl fade-in">
+          <div className="bg-white w-full max-w-md rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 relative shadow-2xl fade-in max-h-[92vh] overflow-y-auto">
 
             {/* CLOSE */}
             <button
@@ -674,7 +674,7 @@ export default function Navbar() {
 
               </div>
 
-              <h2 className="text-4xl font-black text-dark">
+              <h2 className="text-3xl sm:text-4xl font-black text-dark">
 
                 Bienvenido ✨
 

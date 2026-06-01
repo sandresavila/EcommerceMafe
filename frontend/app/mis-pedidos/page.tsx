@@ -186,7 +186,7 @@ export default function MisPedidosPage() {
 
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-black text-dark">
+          <h1 className="text-4xl md:text-6xl font-black text-dark">
 
             Mis pedidos
 
@@ -374,7 +374,7 @@ export default function MisPedidosPage() {
                 >
 
                   {/* TOP */}
-                  <div className="p-8 md:p-10">
+                  <div className="p-5 sm:p-8 md:p-10">
 
                     <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-10">
 
@@ -503,7 +503,7 @@ export default function MisPedidosPage() {
                   </div>
 
                   {/* STATUS */}
-                  <div className="border-t border-gray-100 px-8 md:px-10 py-8 bg-gray-50/70">
+                  <div className="border-t border-gray-100 px-5 sm:px-8 md:px-10 py-6 md:py-8 bg-gray-50/70">
 
                     <div className="flex items-center gap-3 mb-6">
 

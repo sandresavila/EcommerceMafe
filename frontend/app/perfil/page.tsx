@@ -216,7 +216,7 @@ export default function PerfilPage() {
 
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-black text-dark">
+          <h1 className="text-4xl md:text-6xl font-black text-dark">
 
             Mi perfil
 
@@ -284,7 +284,7 @@ export default function PerfilPage() {
               </div>
 
               {/* STATS */}
-              <div className="p-8 space-y-5">
+              <div className="p-5 sm:p-8 space-y-5">
 
                 {/* ITEM */}
                 <div className="flex items-center gap-4">
@@ -379,7 +379,7 @@ export default function PerfilPage() {
 
           <section className="lg:col-span-2 slide-right">
 
-            <div className="bg-white rounded-[2.5rem] shadow-2xl p-8 md:p-10">
+            <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl p-5 sm:p-8 md:p-10">
 
               {/* TITLE */}
               <div className="mb-10">

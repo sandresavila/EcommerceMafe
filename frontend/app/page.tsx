@@ -135,7 +135,7 @@ export default function Home() {
             </div>
 
             {/* TITLE */}
-            <h1 className="text-5xl md:text-7xl font-black leading-[1.05] text-white">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black leading-[1.05] text-white">
 
               Descubre
               <span className="block text-primary mt-2">
@@ -185,7 +185,7 @@ export default function Home() {
             </div>
 
             {/* STATS */}
-            <div className="grid grid-cols-3 gap-6 mt-16">
+            <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 mt-12 sm:mt-16">
 
               {[
                 {
@@ -210,7 +210,7 @@ export default function Home() {
 
                   <div
                     key={index}
-                    className="bg-white/10 backdrop-blur-md border border-white/10 rounded-3xl p-5"
+                    className="bg-white/10 backdrop-blur-md border border-white/10 rounded-3xl p-4 sm:p-5"
                   >
 
                     <h3 className="text-3xl font-black text-white">
@@ -335,7 +335,7 @@ export default function Home() {
 
             </p>
 
-            <h2 className="text-5xl font-black text-gray-900">
+              <h2 className="text-4xl md:text-5xl font-black text-gray-900">
 
               Una experiencia beauty premium
 
@@ -381,7 +381,7 @@ export default function Home() {
 
                 <div
                   key={index}
-                  className="group bg-gradient-to-b from-white to-pink-50 rounded-[2rem] p-10 border border-pink-100 hover:shadow-2xl transition-all hover:-translate-y-2"
+                  className="group bg-gradient-to-b from-white to-pink-50 rounded-[2rem] p-6 md:p-10 border border-pink-100 hover:shadow-2xl transition-all hover:-translate-y-2"
                 >
 
                   <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mb-8 group-hover:bg-primary transition-all">
@@ -494,7 +494,7 @@ export default function Home() {
                     key={
                       producto.id_producto
                     }
-                    className="min-w-[320px]"
+                    className="min-w-[280px] sm:min-w-[320px]"
                   >
 
                     <ProductCard
@@ -528,7 +528,7 @@ export default function Home() {
 
             </p>
 
-            <h2 className="text-5xl font-black text-gray-900">
+              <h2 className="text-4xl md:text-5xl font-black text-gray-900">
 
               Lo que dicen nuestros clientes
 
@@ -625,7 +625,7 @@ export default function Home() {
 
         <div className="relative z-10 max-w-4xl mx-auto text-center px-6">
 
-          <h2 className="text-5xl md:text-6xl font-black text-white leading-tight">
+          <h2 className="text-4xl md:text-6xl font-black text-white leading-tight">
 
             Tu experiencia beauty empieza aquí ✨
 

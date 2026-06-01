@@ -119,7 +119,7 @@ export default function FavoritosPage() {
 
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-black text-dark">
+          <h1 className="text-4xl md:text-6xl font-black text-dark">
 
             Mis favoritos ❤️
 
