@@ -1,105 +1,13 @@
-import express from "express";
-
-import dotenv from "dotenv";
-
-import path from "path";
-
-// APP
-import app from "./app.js";
-
-// ROUTES
-import usuarioRoutes
-  from "./routes/usuario.routes.js";
-
-import productoRoutes
-  from "./routes/producto.routes.js";
-
-import authRoutes
-  from "./routes/auth.routes.js";
-
-import carritoRoutes
-  from "./routes/carrito.routes.js";
-
-import pedidoRoutes
-  from "./routes/pedido.routes.js";
-
-import categoriaRoutes
-  from "./routes/categoria.routes.js";
-
-import favoritoRoutes
-  from "./routes/favoritos.routes.js";
-
-import analyticsRoutes
-  from "./routes/analytics.routes.js"; 
-
-
-dotenv.config();
-
-const PORT =
-  process.env.PORT || 4000;
-
-// =====================================
-// IMAGENES
-// =====================================
-
-app.use(
-  "/uploads",
-  express.static(
-    path.resolve("uploads")
-  )
-);
-
-// =====================================
-// ROUTES
-// =====================================
-
-app.use(
-  "/api/auth",
-  authRoutes
-);
-
-app.use(
-  "/api/usuarios",
-  usuarioRoutes
-);
-
-app.use(
-  "/api/productos",
-  productoRoutes
-);
-
-app.use(
-  "/api/carrito",
-  carritoRoutes
-);
-
-app.use(
-  "/api/pedidos",
-  pedidoRoutes
-);
-
-app.use(
-  "/api/categorias",
-  categoriaRoutes
-);
-
-app.use(
-  "/api/favoritos",
-  favoritoRoutes
-);
-
-app.use(
-  "/api/analytics",
-  analyticsRoutes
-);
-
-// =====================================
-// SERVER
-// =====================================
-
-app.listen(PORT, () => {
-
-  console.log(
-    `Servidor corriendo en http://localhost:${PORT}`
-  );
-});
+import {logError} from './utils/errors.js';
+try {
+  const {default:app}=await import('./app.js');
+  const {config}=await import('./config/env.js');
+  const {pool}=await import('./config/db.js');
+  const server=app.listen(config.port,'0.0.0.0',()=>console.log('Servidor listo en puerto '+config.port));
+  server.on('error',error=>{logError(error);process.exitCode=1;});
+  const shutdown=()=>{
+    server.close(async()=>{await pool.end();process.exit(0);});
+    setTimeout(()=>process.exit(1),10000).unref();
+  };
+  process.once('SIGTERM',shutdown);process.once('SIGINT',shutdown);
+}catch(error){logError(error);console.error('Revisar las variables de configuración requeridas');process.exitCode=1;}

@@ -1,3 +1,4 @@
+import {logError} from '../utils/errors.js';
 import { pool } from "../config/db.js";
 
 import bcrypt from "bcryptjs";
@@ -29,6 +30,8 @@ export const register =
         telefono,
         direccion,
       } = req.body;
+
+      if(typeof nombre!=="string" || !nombre.trim() || nombre.length>100 || typeof correo!=="string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo) || correo.length>100 || typeof password!=="string" || password.length<8 || Buffer.byteLength(password,"utf8")>72) return res.status(400).json({mensaje:"Datos de registro inválidos; contraseña de 8 caracteres y máximo 72 bytes"});
 
       const [usuarioExistente] =
         await pool.query(
@@ -108,10 +111,7 @@ export const register =
 
       } catch (emailError) {
 
-        console.error(
-          "Error enviando email de bienvenida:",
-          emailError
-        );
+        logError(emailError);
       }
 
       res.status(201).json({
@@ -125,7 +125,7 @@ export const register =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
 
@@ -149,6 +149,8 @@ export const login =
         password,
       } = req.body;
 
+      if(typeof correo!=="string" || typeof password!=="string") return res.status(400).json({mensaje:"Credenciales inválidas"});
+
       const [rows] =
         await pool.query(
           `
@@ -162,7 +164,7 @@ export const login =
         );
 
       if (
-        rows.length === 0
+        rows.length === 0 || !rows[0].activo || typeof rows[0].password !== "string"
       ) {
 
         return res.status(400).json({
@@ -233,7 +235,7 @@ export const login =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
 

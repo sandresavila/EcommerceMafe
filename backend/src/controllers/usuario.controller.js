@@ -1,3 +1,4 @@
+import {logError} from '../utils/errors.js';
 import { pool } from "../config/db.js";
 
 import bcrypt from "bcryptjs";
@@ -35,7 +36,7 @@ export const obtenerUsuarios =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         mensaje:
@@ -91,7 +92,7 @@ export const obtenerUsuario =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         mensaje:
@@ -197,7 +198,7 @@ export const crearUsuario =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         mensaje:
@@ -250,7 +251,7 @@ export const actualizarUsuario =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         mensaje:
@@ -307,7 +308,7 @@ export const cambiarRolUsuario =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         mensaje:
@@ -346,7 +347,7 @@ export const bloquearUsuario =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         mensaje:
@@ -385,7 +386,7 @@ export const activarUsuario =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         mensaje:
@@ -456,7 +457,7 @@ export const eliminarUsuario =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         mensaje:
@@ -512,7 +513,7 @@ export const obtenerPerfil =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         mensaje:
@@ -565,7 +566,7 @@ export const actualizarPerfil =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         mensaje:
