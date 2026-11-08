@@ -1,3 +1,4 @@
+import {logError} from '../utils/errors.js';
 import { pool } from "../config/db.js";
 
 // =====================================
@@ -34,7 +35,7 @@ export const obtenerCategorias =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         message:
@@ -79,7 +80,7 @@ export const obtenerCategoria =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         message:
@@ -158,7 +159,7 @@ export const crearCategoria =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         message:
@@ -208,7 +209,7 @@ export const actualizarCategoria =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         message:
@@ -244,7 +245,7 @@ export const eliminarCategoria =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         message:

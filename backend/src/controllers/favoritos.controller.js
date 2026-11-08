@@ -1,3 +1,4 @@
+import {logError} from '../utils/errors.js';
 import { pool } from "../config/db.js";
 
 // =====================================
@@ -35,10 +36,10 @@ export const obtenerFavoritos =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
-        message: error.message,
+        message: "Error interno del servidor",
       });
     }
   };
@@ -110,10 +111,10 @@ export const agregarFavorito =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
-        message: error.message,
+        message: "Error interno del servidor",
       });
     }
   };
@@ -154,10 +155,10 @@ export const eliminarFavorito =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
-        message: error.message,
+        message: "Error interno del servidor",
       });
     }
   };

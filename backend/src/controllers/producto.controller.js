@@ -1,3 +1,6 @@
+import {HttpError} from '../utils/errors.js';
+import {config} from '../config/env.js';
+import {logError} from '../utils/errors.js';
 import { pool } from "../config/db.js";
 
 // =========================================
@@ -24,14 +27,14 @@ export const getProductos =
           `
         );
 
-      res.json(rows);
+      res.json(rows.map(p=>({...p,precio:Number(p.precio),precio_anterior:p.precio_anterior==null?null:Number(p.precio_anterior)})));
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
-        message: error.message,
+        message: "Error interno del servidor",
       });
     }
   };
@@ -71,14 +74,14 @@ export const getProductoById =
         });
       }
 
-      res.json(rows[0]);
+      res.json({...rows[0],precio:Number(rows[0].precio),precio_anterior:rows[0].precio_anterior==null?null:Number(rows[0].precio_anterior)});
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
-        message: error.message,
+        message: "Error interno del servidor",
       });
     }
   };
@@ -106,7 +109,7 @@ export const createProducto =
 
       const imagen_url =
         req.file
-          ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}`
+          ? `${config.backendUrl}/uploads/${req.file.filename}`
           : null;
 
       // =====================================
@@ -165,10 +168,10 @@ export const createProducto =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
-        message: error.message,
+        message: "Error interno del servidor",
       });
     }
   };
@@ -228,7 +231,7 @@ export const updateProducto =
       if (req.file) {
 
         imagen_url =
-          `${process.env.BACKEND_URL}/uploads/${req.file.filename}`
+          `${config.backendUrl}/uploads/${req.file.filename}`
       }
 
       // =====================================
@@ -286,10 +289,10 @@ export const updateProducto =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
-        message: error.message,
+        message: "Error interno del servidor",
       });
     }
   };
@@ -297,44 +300,18 @@ export const updateProducto =
 // =========================================
 // ELIMINAR PRODUCTO
 // =========================================
-export const deleteProducto =
-  async (req, res) => {
-
-    try {
-
-      const { id } = req.params;
-
-      const [result] =
-        await pool.query(
-          `
-          DELETE FROM productos
-
-          WHERE id_producto = ?
-          `,
-          [id]
-        );
-
-      if (
-        result.affectedRows === 0
-      ) {
-
-        return res.status(404).json({
-          message:
-            "Producto no encontrado",
-        });
-      }
-
-      res.json({
-        message:
-          "Producto eliminado",
-      });
-
-    } catch (error) {
-
-      console.error(error);
-
-      res.status(500).json({
-        message: error.message,
-      });
-    }
-  };
+export const deleteProducto = async(req,res,next)=>{
+  let connection;
+  try {
+    const id=Number(req.params.id);
+    if(!Number.isSafeInteger(id)||id<=0)throw new HttpError(400,'Producto inválido');
+    connection=await pool.getConnection();await connection.beginTransaction();
+    const [rows]=await connection.query('SELECT id_producto FROM productos WHERE id_producto=? FOR UPDATE',[id]);
+    if(!rows.length)throw new HttpError(404,'Producto no encontrado');
+    const [history]=await connection.query('SELECT id_detalle FROM pedido_detalle WHERE id_producto=? LIMIT 1',[id]);
+    if(history.length)throw new HttpError(409,'El producto tiene pedidos y no se puede eliminar');
+    await connection.query('DELETE FROM productos WHERE id_producto=?',[id]);await connection.commit();
+    res.json({message:'Producto eliminado'});
+  }catch(error){if(connection)try{await connection.rollback();}catch(e){logError(e);}next(error);}
+  finally{connection?.release();}
+};

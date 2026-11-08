@@ -1,3 +1,6 @@
+import {logError} from '../utils/errors.js';
+import {HttpError} from '../utils/errors.js';
+import {normalizeItems,cents,money,calculateTotals} from '../utils/orderValidation.js';
 import { pool } from "../config/db.js";
 
 import {
@@ -14,280 +17,44 @@ import {
 // CREAR PEDIDO
 // =====================================
 
-export const crearPedido =
-  async (req, res) => {
-
-    const connection =
-      await pool.getConnection();
-
-    try {
-
-      await connection.beginTransaction();
-
-      const {
-        productos,
-        direccion_envio,
-      } = req.body;
-
-      const id_usuario =
-        req.usuario.id;
-
-      // =====================================
-      // USUARIO
-      // =====================================
-
-      const [usuarioRows] =
-        await connection.query(
-          `
-          SELECT *
-
-          FROM usuarios
-
-          WHERE id_usuario = ?
-          `,
-          [id_usuario]
-        );
-
-      const usuario =
-        usuarioRows[0];
-
-      // =====================================
-      // VALIDACIONES
-      // =====================================
-
-      if (
-        !productos ||
-        productos.length === 0
-      ) {
-
-        throw new Error(
-          "El carrito está vacío"
-        );
-      }
-
-      if (!direccion_envio) {
-
-        throw new Error(
-          "La dirección es obligatoria"
-        );
-      }
-
-      // =====================================
-      // VALIDAR STOCK
-      // =====================================
-
-      for (const item of productos) {
-
-        const [productoRows] =
-          await connection.query(
-            `
-            SELECT *
-
-            FROM productos
-
-            WHERE id_producto = ?
-            `,
-            [item.id_producto]
-          );
-
-        if (
-          productoRows.length === 0
-        ) {
-
-          throw new Error(
-            "Producto no encontrado"
-          );
-        }
-
-        const producto =
-          productoRows[0];
-
-        // SIN STOCK
-        if (
-          producto.stock <= 0
-        ) {
-
-          throw new Error(
-            `${producto.nombre} está agotado`
-          );
-        }
-
-        // STOCK INSUFICIENTE
-        if (
-          item.cantidad >
-          producto.stock
-        ) {
-
-          throw new Error(
-            `Stock insuficiente para ${producto.nombre}`
-          );
-        }
-      }
-
-      // =====================================
-      // TOTAL
-      // =====================================
-
-      let total = 0;
-
-      for (const item of productos) {
-
-        total +=
-          item.precio *
-          item.cantidad;
-      }
-
-      // =====================================
-      // CREAR PEDIDO
-      // =====================================
-
-      const [pedidoResult] =
-        await connection.query(
-          `
-          INSERT INTO pedidos
-          (
-            id_usuario,
-            total,
-            direccion_envio
-          )
-
-          VALUES (?, ?, ?)
-          `,
-          [
-            id_usuario,
-            total,
-            direccion_envio,
-          ]
-        );
-
-      const id_pedido =
-        pedidoResult.insertId;
-
-      // =====================================
-      // DETALLE PEDIDO
-      // =====================================
-
-      for (const item of productos) {
-
-        await connection.query(
-          `
-          INSERT INTO pedido_detalle
-          (
-            id_pedido,
-            id_producto,
-            cantidad,
-            precio_unitario
-          )
-
-          VALUES (?, ?, ?, ?)
-          `,
-          [
-            id_pedido,
-            item.id_producto,
-            item.cantidad,
-            item.precio,
-          ]
-        );
-
-        // =====================================
-        // DESCONTAR STOCK
-        // =====================================
-
-        await connection.query(
-          `
-          UPDATE productos
-
-          SET stock = stock - ?
-
-          WHERE id_producto = ?
-          `,
-          [
-            item.cantidad,
-            item.id_producto,
-          ]
-        );
-      }
-
-      // =====================================
-      // COMMIT
-      // =====================================
-
-      await connection.commit();
-
-      // =====================================
-      // EMAIL PEDIDO
-      // =====================================
-
-      try {
-
-        await transporter.sendMail({
-
-          from:
-            `"MAFE Beauty" <${process.env.EMAIL_USER}>`,
-
-          to:
-            usuario.correo,
-
-          subject:
-            `Pedido #${id_pedido} creado en MAFE Beauty`,
-
-          html:
-            orderCreatedEmailTemplate({
-              idPedido:
-                id_pedido,
-
-              nombre:
-                usuario.nombre,
-
-              direccion:
-                direccion_envio,
-
-              productos,
-
-              total,
-
-              orderUrl:
-                `${getStoreUrl()}/pedido/${id_pedido}`,
-            }),
-        });
-
-      } catch (emailError) {
-
-        console.error(
-          "Error email pedido:",
-          emailError
-        );
-      }
-
-      // =====================================
-      // RESPUESTA
-      // =====================================
-
-      res.status(201).json({
-
-        message:
-          "Pedido creado",
-
-        id_pedido,
-      });
-
-    } catch (error) {
-
-      await connection.rollback();
-
-      console.error(error);
-
-      res.status(500).json({
-
-        message:
-          error.message,
-      });
-
-    } finally {
-
-      connection.release();
+export const crearPedido = async (req,res,next) => {
+  let connection,committed=false,order;
+  try {
+    const items=normalizeItems(req.body?.productos);
+    const direccion=req.body?.direccion_envio;
+    if(typeof direccion!=='string'||!direccion.trim()||direccion.trim().length>2000)throw new HttpError(400,'La dirección es obligatoria y no debe superar 2000 caracteres');
+    connection=await pool.getConnection();
+    await connection.beginTransaction();
+    const [users]=await connection.query('SELECT nombre,correo,activo FROM usuarios WHERE id_usuario=?',[req.usuario.id]);
+    if(!users[0]?.activo)throw new HttpError(401,'Usuario no disponible');
+    const productos=[];let subtotalCents=0;
+    // Stable lock order and row locks prevent overselling, including duplicate lines.
+    for(const item of items) {
+      const [rows]=await connection.query('SELECT id_producto,nombre,precio,stock FROM productos WHERE id_producto=? FOR UPDATE',[item.id_producto]);
+      const p=rows[0];if(!p)throw new HttpError(404,'Producto no encontrado');
+      if(p.stock<item.cantidad)throw new HttpError(409,'Stock insuficiente');
+      const priceCents=cents(p.precio);subtotalCents+=priceCents*item.cantidad;
+      productos.push({...item,nombre:p.nombre,precio:money(priceCents)});
     }
-  };
+    const totals=calculateTotals(subtotalCents);
+    const [created]=await connection.query('INSERT INTO pedidos (id_usuario,total,direccion_envio) VALUES (?,?,?)',[req.usuario.id,totals.total,direccion.trim()]);
+    for(const item of productos) {
+      const [changed]=await connection.query('UPDATE productos SET stock=stock-? WHERE id_producto=? AND stock>=?',[item.cantidad,item.id_producto,item.cantidad]);
+      if(changed.affectedRows!==1)throw new HttpError(409,'Stock insuficiente');
+      await connection.query('INSERT INTO pedido_detalle (id_pedido,id_producto,cantidad,precio_unitario) VALUES (?,?,?,?)',[created.insertId,item.id_producto,item.cantidad,item.precio]);
+    }
+    await connection.commit();committed=true;
+    order={id:created.insertId,usuario:users[0],productos,direccion:direccion.trim(),...totals};
+  }catch(error){
+    if(connection&&!committed)try{await connection.rollback();}catch(rollbackError){logError(rollbackError);}
+    return next(error);
+  }finally{connection?.release();}
+  try {
+    await transporter.sendMail({from:'"MAFE Beauty" <'+process.env.EMAIL_USER+'>',to:order.usuario.correo,subject:'Pedido #'+order.id+' creado en MAFE Beauty',
+      html:orderCreatedEmailTemplate({idPedido:order.id,nombre:order.usuario.nombre,direccion:order.direccion,productos:order.productos,total:order.total,orderUrl:getStoreUrl()+'/pedido/'+order.id})});
+  }catch(error){logError(error);}
+  res.status(201).json({message:'Pedido creado',id_pedido:order.id,subtotal:order.subtotal,envio:order.envio,total:order.total});
+};
 
 // =====================================
 // OBTENER TODOS LOS PEDIDOS (ADMIN)
@@ -320,11 +87,11 @@ export const obtenerPedidos =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         message:
-          error.message,
+          "Error interno del servidor",
       });
     }
   };
@@ -364,7 +131,7 @@ export const obtenerMisPedidos =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         message:
@@ -406,6 +173,8 @@ export const obtenerDetallePedido =
             "Pedido no encontrado",
         });
       }
+
+      if (req.usuario.rol !== 'admin' && pedidoRows[0].id_usuario !== req.usuario.id) return res.status(404).json({message:'Pedido no encontrado'});
 
       const [productos] =
         await pool.query(
@@ -468,11 +237,11 @@ export const obtenerDetallePedido =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         message:
-          error.message,
+          "Error interno del servidor",
       });
     }
   };
@@ -592,10 +361,7 @@ export const actualizarEstadoPedido =
 
         } catch (emailError) {
 
-          console.error(
-            "Error enviando email de estado:",
-            emailError
-          );
+          logError(emailError);
         }
       }
 
@@ -606,11 +372,11 @@ export const actualizarEstadoPedido =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         message:
-          error.message,
+          "Error interno del servidor",
       });
     }
   };
@@ -826,11 +592,11 @@ export const dashboardAdmin =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         message:
-          error.message,
+          "Error interno del servidor",
       });
     }
   };

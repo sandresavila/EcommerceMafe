@@ -1,3 +1,5 @@
+import {positiveInteger} from '../utils/orderValidation.js';
+import {logError} from '../utils/errors.js';
 import { pool } from "../config/db.js";
 
 // OBTENER CARRITO
@@ -48,7 +50,7 @@ export const obtenerCarrito = async (
     res.json(productos);
 
   } catch (error) {
-    console.error(error);
+    logError(error);
 
     res.status(500).json({
       mensaje:
@@ -68,6 +70,8 @@ export const agregarProductoCarrito =
         id_producto,
         cantidad,
       } = req.body;
+
+      try { positiveInteger(id_producto,'Producto'); positiveInteger(cantidad,'Cantidad'); if(cantidad>10000) throw new Error(); } catch { return res.status(400).json({mensaje:'Producto o cantidad inválidos'}); }
 
       // Buscar carrito
       let [carritoRows] =
@@ -163,7 +167,7 @@ export const agregarProductoCarrito =
       });
 
     } catch (error) {
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         mensaje:
@@ -221,7 +225,7 @@ export const eliminarProductoCarrito =
       });
 
     } catch (error) {
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         mensaje:
@@ -271,7 +275,7 @@ export const vaciarCarrito =
       });
 
     } catch (error) {
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         mensaje:

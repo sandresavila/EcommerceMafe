@@ -1,3 +1,4 @@
+import {validateProduct} from '../middlewares/product.middleware.js';
 import { Router } from "express";
 
 import {
@@ -36,6 +37,7 @@ router.post(
   verificarToken,
   esAdmin,
   upload.single("imagen"),
+  validateProduct,
   createProducto
 );
 
@@ -45,6 +47,7 @@ router.put(
   verificarToken,
   esAdmin,
   upload.single("imagen"),
+  validateProduct,
   updateProducto
 );
 

@@ -1,3 +1,4 @@
+import {logError} from '../utils/errors.js';
 import { pool } from "../config/db.js";
 
 // =====================================
@@ -30,7 +31,7 @@ export const ventasMensuales =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         message:
@@ -65,7 +66,7 @@ export const pedidosPorEstado =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         message:
@@ -107,7 +108,7 @@ export const productosMasVendidos =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         message:
@@ -144,7 +145,7 @@ export const usuariosNuevos =
 
     } catch (error) {
 
-      console.error(error);
+      logError(error);
 
       res.status(500).json({
         message:
